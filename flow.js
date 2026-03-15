@@ -134,9 +134,9 @@ function generateFlow(){
             }
         }
         // Input/Output: দেখাও
-        else if(/দেখাও/.test(line)){
+        else if((/দেখাও/.test(line)) || (/নাও/.test(line))){
             nodeId="io"+nodeCount;
-            let ioText=line.replace(/দেখাও\s*/,"");
+            let ioText=line.replace(/দেখাও\s*/ || /নাও\s*/ ,"");
             flow+=nodeId+'=>inputoutput: '+ioText+'|rhombus\n';
 
             if(stack.length>0){
