@@ -1,10 +1,6 @@
 # Bangla2flow
 > Bangla code to flowchart and run.
 
-
-
-## Bangla2Flow এর ৫০টি পূর্ণাঙ্গ কোড উদাহরণ:
-
 ### ১. হ্যালো ওয়ার্ল্ড
 ```py
 দেখাও("হ্যালো পৃথিবী!");
