@@ -35,6 +35,10 @@ body {
     display: flex;
     justify-content: center;
 }
+#banglaCode {
+    font-family: 'Hind Siliguri', sans-serif !important;
+}
+
 
 pre {
     background: #020617;
