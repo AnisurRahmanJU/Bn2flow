@@ -133,7 +133,7 @@ function generateFlow(){
                 nodeCount++;
             }
         }
-        // Input/Output: দেখাও
+        // Input/Output: দেখাওদেখাও/নাও
         else if((/দেখাও/.test(line)) || (/নাও/.test(line))){
             nodeId="io"+nodeCount;
             let ioText=line.replace(/দেখাও\s*/ || /নাও\s*/ ,"");
