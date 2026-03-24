@@ -12,15 +12,13 @@ window.onload = function () {
     lineNumbers: true,
     theme: "default",
     lineWrapping: true,
-    value: `চলক i = ১;
+    value: `চলক ক = ৭;
 
-যতক্ষণ (i <= ১০) {
-  যদি (i % ২ == ০) {
-    দেখাও("জোড়");
-  } নাহলে {
-    দেখাও("বিজোড়");
-  }
-  i = i + ১;
+যদি (ক % ২ == ০) {
+দেখাও("জোড়");
+}
+নাহলে {
+দেখাও("বিজোড়");
 }`
   });
 };
