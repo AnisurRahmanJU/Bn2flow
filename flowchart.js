@@ -1,6 +1,6 @@
 /**
  * Developer: Md. Anisur Rahman
- * Project: JS Visualizer Pro (Bangla Enabled)
+ * Project: JS Visualizer Pro (Bangla Enabled - Full)
  */
 
 let editor;
@@ -25,11 +25,13 @@ window.onload = function () {
 
 // ================== BANGLA COMPILER ==================
 function bnNumberToEn(text) {
-  const map = {
-    "০":"0","১":"1","২":"2","৩":"3","৪":"4",
-    "৫":"5","৬":"6","৭":"7","৮":"8","৯":"9"
-  };
+  const map = { "০":"0","১":"1","২":"2","৩":"3","৪":"4","৫":"5","৬":"6","৭":"7","৮":"8","৯":"9" };
   return text.replace(/[০-৯]/g, d => map[d]);
+}
+
+function enNumberToBn(text) {
+  const map = { "0":"০","1":"১","2":"২","3":"৩","4":"৪","5":"৫","6":"৬","7":"৭","8":"৮","9":"৯" };
+  return text.toString().replace(/[0-9]/g, d => map[d]);
 }
 
 function banglaToJS(code){
@@ -46,13 +48,20 @@ function banglaToJS(code){
     .replace(/এবং/g,"&&")
     .replace(/অথবা/g,"||")
     .replace(/সত্য/g,"true")
-    .replace(/মিথ্যা/g,"false");
+    .replace(/মিথ্যা/g,"false")
+    .replace(/বিকল্প/g,"switch")
+    .replace(/প্রতিটি/g,"for_of")
+    .replace(/প্রতিটি_ইন/g,"for_in")
+    .replace(/চেষ্টা/g,"try")
+    .replace(/ধরো/g,"catch")
+    .replace(/শেষ/g,"finally")
+    .replace(/ছোড়ো/g,"throw");
 }
 
 // ================== FLOWCHART ==================
 function generateFlowchart() {
   const bnCode = editor.getValue();
-  const code = banglaToJS(bnCode); // 🔥 compile
+  const code = banglaToJS(bnCode);
 
   const output = document.getElementById("output");
   output.innerHTML = ""; 
@@ -112,13 +121,10 @@ function buildFlow(ast) {
         const dId = newId("dec");
         nodes.push(`${dId}=>condition: যদি (${getTextBN(node.test)})`);
         edges.push(`${prev}->${dId}`);
-
         const yesEnd = walk(node.consequent, dId + "(yes)");
         const noEnd = node.alternate ? walk(node.alternate, dId + "(no)") : dId + "(no)";
-
         const join = newId("merge");
         nodes.push(`${join}=>operation: পরবর্তী`);
-
         edges.push(`${yesEnd}->${join}`);
         edges.push(`${noEnd}->${join}`);
         return join;
@@ -127,23 +133,78 @@ function buildFlow(ast) {
         const wId = newId("while");
         nodes.push(`${wId}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
         edges.push(`${prev}->${wId}`);
-
         const wEnd = walk(node.body, wId+"(yes)");
         edges.push(`${wEnd}(left)->${wId}`);
-
         return wId+"(no)";
+
+      case "DoWhileStatement":
+        const dStart = newId("do");
+        nodes.push(`${dStart}=>operation: করো`);
+        edges.push(`${prev}->${dStart}`);
+        const dEnd = walk(node.body, dStart);
+        const dCond = newId("doCond");
+        nodes.push(`${dCond}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
+        edges.push(`${dEnd}->${dCond}`);
+        edges.push(`${dCond}(yes)->${dStart}`);
+        return dCond+"(no)";
 
       case "ForStatement":
         const fInit = walk(node.init, prev);
-
         const fId = newId("for");
         nodes.push(`${fId}=>condition: জন্য (${getTextBN(node.test)})`);
         edges.push(`${fInit}->${fId}`);
-
         const fEnd = walk(node.body, fId+"(yes)");
         edges.push(`${fEnd}(left)->${fId}`);
-
         return fId+"(no)";
+
+      case "ForOfStatement":
+        const foId = newId("fo");
+        nodes.push(`${foId}=>condition: প্রতিটি (${getTextBN(node.right)})`);
+        edges.push(`${prev}->${foId}`);
+        const foEnd = walk(node.body, foId+"(yes)");
+        edges.push(`${foEnd}(left)->${foId}`);
+        return foId+"(no)";
+
+      case "ForInStatement":
+        const fiId = newId("fi");
+        nodes.push(`${fiId}=>condition: প্রতিটি_ইন (${getTextBN(node.right)})`);
+        edges.push(`${prev}->${fiId}`);
+        const fiEnd = walk(node.body, fiId+"(yes)");
+        edges.push(`${fiEnd}(left)->${fiId}`);
+        return fiId+"(no)";
+
+      case "SwitchStatement":
+        const sId = newId("switch");
+        nodes.push(`${sId}=>condition: বিকল্প (${getTextBN(node.discriminant)})`);
+        edges.push(`${prev}->${sId}`);
+        let afterSwitch = newId("merge");
+        nodes.push(`${afterSwitch}=>operation: পরবর্তী`);
+        let lastCaseEnd = null;
+        node.cases.forEach((c,index)=>{
+          const cLabel = c.test ? `কেস: ${getTextBN(c.test)}` : "ডিফল্ট";
+          const cId = newId("case");
+          nodes.push(`${cId}=>condition: ${cLabel}`);
+          if(index===0) edges.push(`${sId}(yes)->${cId}`);
+          else edges.push(`${lastCaseEnd}(no)->${cId}`);
+          let ce = cId+"(yes)";
+          c.consequent.forEach(stmt=>ce=walk(stmt,ce));
+          edges.push(`${ce}->${afterSwitch}`);
+          lastCaseEnd = cId;
+        });
+        if(lastCaseEnd) edges.push(`${lastCaseEnd}(no)->${afterSwitch}`);
+        return afterSwitch;
+
+      case "FunctionDeclaration":
+        const funcId = newId("func");
+        nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}`);
+        edges.push(`${prev}->${funcId}`);
+        return walk(node.body, funcId);
+
+      case "ReturnStatement":
+        const rId = newId("ret");
+        nodes.push(`${rId}=>inputoutput: ফেরত ${getTextBN(node.argument)}`);
+        edges.push(`${prev}->${rId}`);
+        return rId;
 
       case "BreakStatement":
         const bId = newId("brk");
@@ -157,14 +218,37 @@ function buildFlow(ast) {
         edges.push(`${prev}->${cId}`);
         return cId;
 
+      case "TryStatement":
+        const tStart = newId("try");
+        nodes.push(`${tStart}=>operation: চেষ্টা`);
+        edges.push(`${prev}->${tStart}`);
+        const tEnd = walk(node.block, tStart);
+        if(node.handler){
+          const cId2 = newId("catch");
+          nodes.push(`${cId2}=>operation: ধরো (${node.handler.param.name})`);
+          edges.push(`${tStart}(no)->${cId2}`);
+          walk(node.handler.body, cId2);
+        }
+        if(node.finalizer){
+          const fId = newId("finally");
+          nodes.push(`${fId}=>operation: শেষ`);
+          walk(node.finalizer,fId);
+        }
+        return tEnd;
+
+      case "ThrowStatement":
+        const thId = newId("throw");
+        nodes.push(`${thId}=>operation: ছোড়ো ${getTextBN(node.argument)}`);
+        edges.push(`${prev}->${thId}`);
+        return thId;
+
       case "ExpressionStatement":
         const eId = newId("out");
         let txt = getTextBN(node.expression);
-
-        if (txt.includes("console.log")) {
-          txt = txt.replace("console.log", "দেখাও");
-        }
-
+        txt = txt.replace("console.log","দেখাও");
+        txt = txt.replace(".push",".যোগকরো");
+        txt = txt.replace(".pop",".সরাও");
+        txt = txt.replace(".length",".দৈর্ঘ্য");
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
@@ -174,42 +258,37 @@ function buildFlow(ast) {
     }
   }
 
-  const final = walk(ast, "st");
+  const final = walk(ast,"st");
   nodes.push("e=>end: শেষ");
   edges.push(`${final}->e`);
-
-  return nodes.join("\n") + "\n" + edges.join("\n");
+  return nodes.join("\n")+"\n"+edges.join("\n");
 }
 
 // ================== BN TEXT ==================
-function getTextBN(node) {
-  if (!node) return "";
+function getTextBN(node){
+  if(!node) return "";
 
-  switch(node.type) {
+  switch(node.type){
     case "Identifier": return node.name;
-    case "Literal": return node.value;
-    case "BinaryExpression":
-      return `${getTextBN(node.left)} ${node.operator} ${getTextBN(node.right)}`;
-    case "AssignmentExpression":
-      return `${getTextBN(node.left)} = ${getTextBN(node.right)}`;
-    case "CallExpression":
-      return `${getTextBN(node.callee)}(${node.arguments.map(getTextBN).join(", ")})`;
+    case "Literal": return enNumberToBn(node.value);
+    case "BinaryExpression": return `${getTextBN(node.left)} ${node.operator} ${getTextBN(node.right)}`;
+    case "AssignmentExpression": return `${getTextBN(node.left)} = ${getTextBN(node.right)}`;
+    case "ArrayExpression": return `[${node.elements.map(getTextBN).join(", ")}]`;
+    case "MemberExpression":
+      if(node.computed) return `${getTextBN(node.object)}[${getTextBN(node.property)}]`;
+      return `${getTextBN(node.object)}.${getTextBN(node.property)}`;
+    case "CallExpression": return `${getTextBN(node.callee)}(${node.arguments.map(getTextBN).join(", ")})`;
     default: return "";
   }
 }
 
 // ================== RUN ==================
-function runCode() {
+function runCode(){
   const consoleEl = document.getElementById("console");
   consoleEl.innerText = "";
-
   const code = banglaToJS(editor.getValue());
-
   const originalLog = console.log;
-  console.log = (...args)=>consoleEl.innerText += args.join(" ") + "\n";
-
-  try { eval(code); }
-  catch(err){ consoleEl.innerText += "Error: " + err.message; }
-
+  console.log = (...args)=>consoleEl.innerText+=args.join(" ")+"\n";
+  try{ eval(code); } catch(err){ consoleEl.innerText+="Error: "+err.message; }
   console.log = originalLog;
 }
