@@ -55,45 +55,7 @@
 </main>
 
 <script src="flowchart.js"></script>
-<script>
-  // বাংলা সংখ্যার ম্যাপ
-  const banglaDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 
-  // ইংরেজি সংখ্যাকে বাংলা সংখ্যায় রূপান্তর
-  function toBanglaNumber(input) {
-    return input.toString().replace(/\d/g, d => banglaDigits[d]);
-  }
-
-  // কনসোলে বাংলা আউটপুট
-  function logToConsole(value) {
-    let output = value;
-
-    if (typeof value === 'boolean') {
-      output = value ? 'সত্য' : 'মিথ্যা';
-    } else if (typeof value === 'number') {
-      output = toBanglaNumber(value);
-    } else if (typeof value === 'string') {
-      // স্ট্রিং-এর মধ্যে সংখ্যা থাকলে বাংলা সংখ্যা হিসেবে দেখান
-      output = value.replace(/\d+/g, match => toBanglaNumber(match));
-    }
-
-    const consoleEl = document.getElementById('console');
-    consoleEl.textContent += output + '\n';
-  }
-
-  // কোড রান করা (CodeMirror ব্যবহার করে)
-  function runCode() {
-    const code = editor.getValue();
-    try {
-      // নতুন ফাংশন ব্যবহার করে নিরাপদভাবে রান
-      const func = new Function('log', code);
-      const result = func(logToConsole);
-      if (result !== undefined) logToConsole(result);
-    } catch (e) {
-      logToConsole('ত্রুটি: ' + e.message);
-    }
-  }
-</script>
 
 </body>
 </html>
