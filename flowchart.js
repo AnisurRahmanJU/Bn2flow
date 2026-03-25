@@ -4,6 +4,7 @@
  */
 
 let editor;
+let currentLoopUpdate = null;
 
 // ================== INIT ==================
 window.onload = function () {
@@ -169,20 +170,26 @@ function buildFlow(ast) {
   case "ForStatement":
   const fInit = node.init ? walk(node.init, prev) : prev;
 
-  const fCondId = newId("forCond");
-  nodes.push(`${fCondId}=>condition: FOR: ${getText(node.test)}|decision`);
-  edges.push(`${fInit}->${fCondId}`);
+  const fCond = newId("for");
+  const condText = node.test ? getTextBN(node.test) : "true";
+  nodes.push(`${fCond}=>condition: লুপ (${condText})`);
+  edges.push(`${fInit}->${fCond}`);
 
-  const fBodyEnd = walk(node.body, fCondId + "(yes)");
+  const prevUpdate = currentLoopUpdate;
+  const fUpdate = newId("upd");
+  currentLoopUpdate = fUpdate;
 
-  const fUpdId = newId("upd");
-  const updText = node.update ? getText(node.update) : "";
-  nodes.push(`${fUpdId}=>operation: ${updText}|process`);
-  edges.push(`${fBodyEnd}->${fUpdId}`);
+  const fBodyEnd = walk(node.body, fCond + "(yes)");
 
-  edges.push(`${fUpdId}(left)->${fCondId}`);
+  const updText = node.update ? getTextBN(node.update) : "";
+  nodes.push(`${fUpdate}=>operation: ${updText}`);
+  edges.push(`${fBodyEnd}->${fUpdate}`);
 
-  return fCondId + "(no)";
+  edges.push(`${fUpdate}(left)->${fCond}`);
+
+  currentLoopUpdate = prevUpdate;
+
+  return fCond + "(no)";
 
       case "ForOfStatement":
         const foId = newId("fo");
@@ -302,7 +309,7 @@ function buildFlow(ast) {
 }
 
 // ================== BN TEXT ==================
-/*function getTextBN(node){
+function getTextBN(node){
   if(!node) return "";
 
   switch(node.type){
@@ -311,54 +318,19 @@ function buildFlow(ast) {
     case "BinaryExpression": return `${getTextBN(node.left)} ${node.operator} ${getTextBN(node.right)}`;
     case "AssignmentExpression": return `${getTextBN(node.left)} = ${getTextBN(node.right)}`;
     case "ArrayExpression": return `[${node.elements.map(getTextBN).join(", ")}]`;
+    case "UpdateExpression":
+    return node.prefix
+    ? `${node.operator}${getTextBN(node.argument)}`
+    : `${getTextBN(node.argument)}${node.operator}`;
     case "MemberExpression":
       if(node.computed) return `${getTextBN(node.object)}[${getTextBN(node.property)}]`;
       return `${getTextBN(node.object)}.${getTextBN(node.property)}`;
     case "CallExpression": return `${getTextBN(node.callee)}(${node.arguments.map(getTextBN).join(", ")})`;
     default: return "";
   }
-}*/
-
-function getTextBN(node){
-  if(!node) return "";
-
-  switch(node.type){
-
-    case "Identifier":
-      return node.name;
-
-    case "Literal":
-      return enNumberToBn(node.value);
-
-    case "BinaryExpression":
-      return `${getTextBN(node.left)} ${node.operator} ${getTextBN(node.right)}`;
-
-    case "AssignmentExpression":
-      return `${getTextBN(node.left)} ${node.operator} ${getTextBN(node.right)}`;
-
-    case "UpdateExpression":
-      return node.prefix
-        ? `${node.operator}${getTextBN(node.argument)}`
-        : `${getTextBN(node.argument)}${node.operator}`;
-
-    case "UnaryExpression":
-      return `${node.operator}${getTextBN(node.argument)}`;
-
-    case "ArrayExpression":
-      return `[${node.elements.map(getTextBN).join(", ")}]`;
-
-    case "MemberExpression":
-      if(node.computed)
-        return `${getTextBN(node.object)}[${getTextBN(node.property)}]`;
-      return `${getTextBN(node.object)}.${getTextBN(node.property)}`;
-
-    case "CallExpression":
-      return `${getTextBN(node.callee)}(${node.arguments.map(getTextBN).join(", ")})`;
-
-    default:
-      return "";
-  }
 }
+
+
 
 
 // ================== RUN ==================
