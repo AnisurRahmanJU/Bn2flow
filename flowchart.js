@@ -157,16 +157,7 @@ function buildFlow(ast) {
         edges.push(`${dEnd}->${dCond}`);
         edges.push(`${dCond}(yes)->${dStart}`);
         return dCond+"(no)";
-
-     /** case "ForStatement":
-        const fInit = walk(node.init, prev);
-        const fId = newId("for");
-        nodes.push(`${fId}=>condition: লুপ (${getTextBN(node.test)})`);
-        edges.push(`${fInit}->${fId}`);
-        const fEnd = walk(node.body, fId+"(yes)");
-        edges.push(`${fEnd}(left)->${fId}`);
-        return fId+"(no)";
-        */
+     
   case "ForStatement":
   const fInit = node.init ? walk(node.init, prev) : prev;
 
@@ -245,12 +236,7 @@ function buildFlow(ast) {
         nodes.push(`${bId}=>operation: থামো`);
         edges.push(`${prev}->${bId}`);
         return bId;
-
-     /* case "ContinueStatement":
-        const cId = newId("cont");
-        nodes.push(`${cId}=>operation: বাদ`);
-        edges.push(`${prev}->${cId}`);
-        return cId;*/
+     
   case "ContinueStatement":
   const cId = newId("cont");
   nodes.push(`${cId}=>operation: বাদ`);
