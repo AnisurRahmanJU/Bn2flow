@@ -1,6 +1,6 @@
 /**
  * Developer: Md. Anisur Rahman
- * Project: JS Visualizer Pro (Bangla Enabled - Full)
+ * Project: JS Visualizer Pro (Bangla Enabled - Full + Colored + Download)
  */
 
 let editor;
@@ -66,7 +66,6 @@ function banglaToJS(code){
     .replace(/নাল/g, "NULL")
     .replace(/প্রতিটি/g,"for_of")
     .replace(/প্রতিটি_ইন/g,"for_in"); 
-    
 }
 
 // ================== FLOWCHART ==================
@@ -92,12 +91,53 @@ function generateFlowchart() {
       'font-family': 'Inter',
       'yes-text': 'হ্যাঁ',
       'no-text': 'না',
-      'scale': isMobile ? 0.85 : 1
+      'scale': isMobile ? 0.85 : 1,
+      'symbols': {
+        'start': { 'fill': '#6aa84f', 'font-color':'#fff' },
+        'end': { 'fill': '#e06666', 'font-color':'#fff' },
+        'operation': { 'fill': '#f6b26b', 'font-color':'#000' },
+        'condition': { 'fill': '#3d85c6', 'font-color':'#fff' },
+        'inputoutput': { 'fill': '#ffd966', 'font-color':'#000' },
+        'subroutine': { 'fill': '#8e7cc3', 'font-color':'#fff' }
+      }
     });
 
   } catch (err) {
     output.innerHTML = `<p style="color:red">${err.message}</p>`;
   }
+}
+
+// ================== DOWNLOAD FLOWCHART ==================
+function downloadFlowchart() {
+  const svg = document.querySelector("#output svg");
+  if (!svg) {
+    alert("আগে ফ্লোচার্ট তৈরি করুন!");
+    return;
+  }
+
+  const serializer = new XMLSerializer();
+  const source = serializer.serializeToString(svg);
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const svgSize = svg.getBoundingClientRect();
+  canvas.width = svgSize.width * 2;
+  canvas.height = svgSize.height * 2;
+
+  const img = new Image();
+  img.onload = () => {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const link = document.createElement("a");
+    link.download = "flowchart.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(source)));
 }
 
 // ================== AST WALK ==================
@@ -158,8 +198,8 @@ function buildFlow(ast) {
         edges.push(`${dEnd}->${dCond}`);
         edges.push(`${dCond}(yes)->${dStart}`);
         return dCond+"(no)";
-     
-  case "ForStatement":
+
+      case "ForStatement":
   const fInit = node.init ? walk(node.init, prev) : prev;
 
   const fCond = newId("for");
@@ -182,7 +222,7 @@ function buildFlow(ast) {
   currentLoopUpdate = prevUpdate;
 
   return fCond + "(no)";
-
+  
       case "ForOfStatement":
         const foId = newId("fo");
         nodes.push(`${foId}=>condition: প্রতিটি (${getTextBN(node.right)})`);
@@ -237,18 +277,16 @@ function buildFlow(ast) {
         nodes.push(`${bId}=>operation: থামো`);
         edges.push(`${prev}->${bId}`);
         return bId;
-     
-  case "ContinueStatement":
-  const cId = newId("cont");
-  nodes.push(`${cId}=>operation: বাদ`);
-  edges.push(`${prev}->${cId}`);
 
-  if(currentLoopUpdate){
-    edges.push(`${cId}->${currentLoopUpdate}`);
-  }
+      case "ContinueStatement":
+        const cId = newId("cont");
+        nodes.push(`${cId}=>operation: বাদ`);
+        edges.push(`${prev}->${cId}`);
+        if(currentLoopUpdate){
+          edges.push(`${cId}->${currentLoopUpdate}`);
+        }
+        return cId;
 
-  return cId;
-        
       case "TryStatement":
         const tStart = newId("try");
         nodes.push(`${tStart}=>operation: চেষ্টা`);
@@ -306,9 +344,9 @@ function getTextBN(node){
     case "AssignmentExpression": return `${getTextBN(node.left)} = ${getTextBN(node.right)}`;
     case "ArrayExpression": return `[${node.elements.map(getTextBN).join(", ")}]`;
     case "UpdateExpression":
-    return node.prefix
-    ? `${node.operator}${getTextBN(node.argument)}`
-    : `${getTextBN(node.argument)}${node.operator}`;
+      return node.prefix
+        ? `${node.operator}${getTextBN(node.argument)}`
+        : `${getTextBN(node.argument)}${node.operator}`;
     case "MemberExpression":
       if(node.computed) return `${getTextBN(node.object)}[${getTextBN(node.property)}]`;
       return `${getTextBN(node.object)}.${getTextBN(node.property)}`;
@@ -316,9 +354,6 @@ function getTextBN(node){
     default: return "";
   }
 }
-
-
-
 
 // ================== RUN ==================
 function runCode(){
@@ -330,3 +365,7 @@ function runCode(){
   try{ eval(code); } catch(err){ consoleEl.innerText+="Error: "+err.message; }
   console.log = originalLog;
 }
+
+// ================== DOWNLOAD BUTTON ==================
+document.getElementById("downloadBtn").addEventListener("click", downloadFlowchart);
+        
