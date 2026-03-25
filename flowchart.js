@@ -40,6 +40,7 @@ function banglaToJS(code){
     .replace(/ধ্রুবক/g,"const")
     .replace(/দেখাও/g,"console.log")
     .replace(/নাও/g,"prompt")
+    .replace(/নাও/g,"Number(prompt)")
     .replace(/যদি/g,"if")
     .replace(/নাহলে/g,"else")
     .replace(/যতক্ষণ/g,"while")
