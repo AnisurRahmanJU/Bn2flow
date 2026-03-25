@@ -51,6 +51,10 @@ function banglaToJS(code){
     .replace(/সত্য/g,"true")
     .replace(/মিথ্যা/g,"false")
     .replace(/সুইচ/g,"switch")
+    .replace(/কেস/g,"case")
+    .replace(/ডিফল্ট/g,"default")
+    .replace(/থামো/g,"break")
+    .replace(/বাদ/g,"continue")
     .replace(/চেষ্টা/g,"try")
     .replace(/ধরো/g,"catch")
     .replace(/শেষ/g,"finally")
@@ -179,7 +183,7 @@ function buildFlow(ast) {
 
       case "SwitchStatement":
         const sId = newId("switch");
-        nodes.push(`${sId}=>condition: বিকল্প (${getTextBN(node.discriminant)})`);
+        nodes.push(`${sId}=>condition: সুইচ (${getTextBN(node.discriminant)})`);
         edges.push(`${prev}->${sId}`);
         let afterSwitch = newId("merge");
         nodes.push(`${afterSwitch}=>operation: পরবর্তী`);
@@ -218,7 +222,7 @@ function buildFlow(ast) {
 
       case "ContinueStatement":
         const cId = newId("cont");
-        nodes.push(`${cId}=>operation: চালিয়ে যাও`);
+        nodes.push(`${cId}=>operation: বাদ`);
         edges.push(`${prev}->${cId}`);
         return cId;
 
