@@ -293,6 +293,3 @@ Bangla2Flow হলো একটি IDE যা **বাংলা কোডকে 
 * Flowchart জেনারেট করতে পারবেন
 
 ⭐ Happy Coding in Bangla!
-
-```
-
