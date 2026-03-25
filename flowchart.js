@@ -163,6 +163,10 @@ function buildFlow(ast) {
         nodes.push(`${fId}=>condition: লুপ (${getTextBN(node.test)})`);
         edges.push(`${fInit}->${fId}`);
         const fEnd = walk(node.body, fId+"(yes)");
+        const fUpdId = newId("upd");
+        nodes.push(`${fUpdId}=>operation: ${getText(node.update)}|process`);
+        edges.push(`${fBodyEnd}->${fUpdId}`);
+        edges.push(`${fUpdId}(left)->${fCondId}`);
         edges.push(`${fEnd}(left)->${fId}`);
         return fId+"(no)";
 
