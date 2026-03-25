@@ -43,20 +43,23 @@ function banglaToJS(code){
     .replace(/যদি/g,"if")
     .replace(/নাহলে/g,"else")
     .replace(/যতক্ষণ/g,"while")
+    .replace(/লুপ/g,"for")
     .replace(/ফাংশন/g,"function")
     .replace(/ফেরত/g,"return")
     .replace(/এবং/g,"&&")
     .replace(/অথবা/g,"||")
     .replace(/সত্য/g,"true")
     .replace(/মিথ্যা/g,"false")
-    .replace(/বিকল্প/g,"switch")
-    .replace(/প্রতিটি/g,"for_of")
-    .replace(/প্রতিটি_ইন/g,"for_in")
+    .replace(/সুইচ/g,"switch")
     .replace(/চেষ্টা/g,"try")
     .replace(/ধরো/g,"catch")
     .replace(/শেষ/g,"finally")
     .replace(/ছোড়ো/g,"throw")
-    .replace(/দৈর্ঘ্য/g, "length");
+    .replace(/দৈর্ঘ্য/g, "length")
+    .replace(/নাল/g, "NULL")
+    .replace(/প্রতিটি/g,"for_of")
+    .replace(/প্রতিটি_ইন/g,"for_in");
+    
 }
 
 // ================== FLOWCHART ==================
@@ -152,7 +155,7 @@ function buildFlow(ast) {
       case "ForStatement":
         const fInit = walk(node.init, prev);
         const fId = newId("for");
-        nodes.push(`${fId}=>condition: জন্য (${getTextBN(node.test)})`);
+        nodes.push(`${fId}=>condition: লুপ (${getTextBN(node.test)})`);
         edges.push(`${fInit}->${fId}`);
         const fEnd = walk(node.body, fId+"(yes)");
         edges.push(`${fEnd}(left)->${fId}`);
