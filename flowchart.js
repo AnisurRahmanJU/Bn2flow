@@ -108,7 +108,8 @@ function generateFlowchart() {
 }
 
 // ================== DOWNLOAD FLOWCHART ==================
-function downloadFlowchart() {
+function downloadImage() {
+downloadFlowchart();
   const svg = document.querySelector("#output svg");
   if (!svg) {
     alert("আগে ফ্লোচার্ট তৈরি করুন!");
