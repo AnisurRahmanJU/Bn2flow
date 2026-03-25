@@ -108,8 +108,7 @@ function generateFlowchart() {
 }
 
 // ================== DOWNLOAD FLOWCHART ==================
-// ✅ High-Resolution PNG Download
-function downloadImage() {
+ function downloadImage() {
   const svg = document.querySelector("#output svg");
   if (!svg) { alert("Please generate a flowchart first!"); return; }
 
