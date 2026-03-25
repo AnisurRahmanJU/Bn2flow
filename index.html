@@ -55,6 +55,48 @@
 </main>
 
 <script src="flowchart.js"></script>
+<script>
+  // পুরাতন console.log কে ধরে রাখা
+  const originalLog = console.log;
 
+  // ইংরেজি সংখ্যাকে বাংলা সংখ্যায় রূপান্তরের ম্যাপিং
+  const engToBengaliMap = {
+    '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
+    '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
+  };
+
+  function toBengaliNumbers(input) {
+    return input.toString().replace(/\d/g, (match) => engToBengaliMap[match]);
+  }
+
+  // console.log কে রি-ডিফাইন করা
+  console.log = function(...args) {
+    const formattedArgs = args.map(arg => {
+      // Boolean চেক করা
+      if (arg === true) return "সত্য";
+      if (arg === false) return "মিথ্যা";
+      
+      // সংখ্যা হলে রূপান্তর করা (যদি স্ট্রিং এর ভেতরেও থাকে)
+      if (typeof arg === 'number') return toBengaliNumbers(arg);
+      if (typeof arg === 'string') return toBengaliNumbers(arg);
+      
+      return arg;
+    });
+
+    // আসল console.log ব্যবহার করে কনসোলে দেখানো
+    originalLog.apply(console, formattedArgs);
+
+    // আপনার ওয়েবপেজের <pre id="console"> এ দেখানো
+    const consoleDiv = document.getElementById('console');
+    if (consoleDiv) {
+      consoleDiv.innerHTML += formattedArgs.join(' ') + '\n';
+    }
+  };
+
+  // পরীক্ষা করার জন্য: (আপনার runCode() ফাংশনের ভেতর এগুলো ব্যবহার করবেন)
+  // console.log(12345);      // আউটপুট: ১২৩৪৫
+  // console.log(true);       // আউটপুট: সত্য
+  // console.log(false);      // আউটপুট: মিথ্যা
+</script>
 </body>
 </html>
