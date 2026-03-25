@@ -98,3 +98,11 @@ button:active { transform: scale(0.95); }
     margin: 0; /* বাম দিক থেকে শুরু হবে */
   }
 }
+
+/* Syntax Highlighting*/
+.cm-keyword-custom { color: orchid; font-weight: 500; }
+.cm-func-call { color: blue; }
+.cm-object-access { color: orange; }
+.cm-bangla-number { color: limegreen; }
+.cm-comment-custom { color: gray; font-style: italic; }
+.cm-string-custom { color: green; }
