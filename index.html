@@ -56,45 +56,26 @@
 
 <script src="flowchart.js"></script>
 <script>
-  (function() {
-    // পুরাতন console.log সেভ করে রাখা
-    const originalLog = console.log;
+function toBN(text) {
+    const engToBn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+    return text.toString().replace(/[0-9]/g, d => engToBn[d]);
+}
+function convertBoolToBangla(val) {
+    if (val === true) return 'সত্য';
+    if (val === false) return 'মিথ্যা';
+    return val;
+}
 
-    // ইংরেজি থেকে বাংলা সংখ্যার ম্যাপিং টেবিল
-    const engToBengaliDigits = {
-      '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
-      '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
-    };
-
-    // রূপান্তর করার মূল ফাংশন
-    function translateToBangla(input) {
-      if (input === true) return "সত্য";
-      if (input === false) return "মিথ্যা";
-      
-      // input-কে স্ট্রিংয়ে রূপান্তর করে ইংরেজি সংখ্যাগুলো খুঁজে বের করে বদলে দেওয়া
-      return String(input).replace(/\d/g, (digit) => engToBengaliDigits[digit]);
-    }
-
-    // console.log রি-রাইট করা
+(function() {
+    const outputDiv = document.getElementById('output');
     console.log = function(...args) {
-      // প্রতিটি আর্গুমেন্টকে রূপান্তর করা (যেমন: ক2 -> ক২, 13 -> ১৩)
-      const translatedArgs = args.map(arg => translateToBangla(arg));
-      
-      // ব্রাউজার কনসোলে আসল আউটপুট দেখানো
-      originalLog.apply(console, translatedArgs);
-
-      // আপনার HTML-এর 'console' আইডি যুক্ত এলিমেন্টে আউটপুট দেখানো
-      const consoleOutput = document.getElementById('console');
-      if (consoleOutput) {
-        // নতুন লাইনসহ আউটপুট যোগ করা
-        const message = translatedArgs.join(' ');
-        consoleOutput.innerText += message + '\n';
-        
-        // অটো-স্ক্রল নিচে রাখা
-        consoleOutput.scrollTop = consoleOutput.scrollHeight;
-      }
+        args.forEach(arg => {
+            outputDiv.innerHTML += `<span>${toBN(convertBoolToBangla(arg))}</span>\n`;
+        });
+        outputDiv.scrollTop = outputDiv.scrollHeight;
     };
-  })();
-</script> 
+})();
+</script>
+
 </body>
 </html>
