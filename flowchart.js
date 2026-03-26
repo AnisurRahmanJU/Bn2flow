@@ -342,6 +342,8 @@ function buildFlow(ast) {
         txt = txt.replace(".toUpperCase",".বড়হাতেরঅক্ষর");
         txt = txt.replace(".toLowerCase",".ছোটহাতেরঅক্ষর");
         txt = txt.replace(".substr",".উপস্ট্রিং");
+        txt = txt.replace("true","সত্য");
+        txt = txt.replace("false","মিথ্যা");
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
