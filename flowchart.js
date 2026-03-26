@@ -70,7 +70,9 @@ function banglaToJS(code){
     .replace(/সরাও/g,"pop")
     .replace(/অংশ/g,"slice")
     .replace(/বড়হাতেরঅক্ষর/g,"toUpperCase")
-    .replace(/ছোটহাতেরঅক্ষর/g,"toLowerCase"); 
+    .replace(/ছোটহাতেরঅক্ষর/g,"toLowerCase")
+    .replace(/নং/g,"Number");
+  
 }
 
 // ================== FLOWCHART ==================
