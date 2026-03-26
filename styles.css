@@ -28,6 +28,7 @@ header {
   background: #fff;
   margin-bottom: 15px;
   overflow-x: auto;
+  overflow-y: auto;
 }
 
 /* Button Grid */
@@ -84,6 +85,7 @@ button:active { transform: scale(0.95); }
   min-height: 60px;
   white-space: pre-wrap;
   overflow: auto;
+  overflow-x: auto;
 }
 
 /* --- MOBILE SPECIFIC FIXES --- */
