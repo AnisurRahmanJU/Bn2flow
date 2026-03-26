@@ -105,7 +105,7 @@ button:active { transform: scale(0.95); }
 }
 
 /* Syntax Highlighting*/
-.cm-variable-custom { color: orange; }
+.cm-variable-custom { color: pink; }
 .cm-keyword-custom { color: purple; font-weight: 500; }
 .cm-func-call { color: blue; }
 .cm-object-access { color: orchid; }
