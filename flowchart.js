@@ -48,8 +48,8 @@ function banglaToJS(code){
     .replace(/লুপ/g,"for")
     .replace(/ফাংশন/g,"function")
     .replace(/ফেরত/g,"return")
-    .replace(/এবং/g,"&&")
-    .replace(/অথবা/g,"||")
+    .replace(/\bএবং\b/g,"&&")
+    .replace(/\bঅথবা\b/g,"||")
     .replace(/\bসত্য\b/g,"true")
     .replace(/\bমিথ্যা\b/g,"false")
     .replace(/সুইচ/g,"switch")
@@ -343,8 +343,6 @@ function buildFlow(ast) {
         txt = txt.replace(".substr",".উপস্ট্রিং");
         txt = txt.replace("true","সত্য");
         txt = txt.replace("false","মিথ্যা");
-        txt = txt.replace("এবং","&&");
-        txt = txt.replace("অথবা","||");
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
