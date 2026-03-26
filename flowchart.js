@@ -38,6 +38,7 @@ function enNumberToBn(text) {
 
 function banglaToJS(code){
   return bnNumberToEn(code)
+    .replace(/ধরি/g,"let")
     .replace(/চলক/g,"let")
     .replace(/ধ্রুবক/g,"const")
     .replace(/দেখাও/g,"console.log")
