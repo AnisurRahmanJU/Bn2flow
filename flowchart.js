@@ -350,6 +350,7 @@ function buildFlow(ast) {
         txt = txt.replace(".substr",".উপস্ট্রিং");
         txt = txt.replace("true","সত্য");
         txt = txt.replace("false","মিথ্যা");
+        txt = txt.replace("prompt","নাও");
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
