@@ -343,6 +343,10 @@ function buildFlow(ast) {
         txt = txt.replace(".substr",".উপস্ট্রিং");
         txt = txt.replace("true","সত্য");
         txt = txt.replace("false","মিথ্যা");
+        txt = txt.replace("||","||");
+        txt = txt.replace("&&","&&");
+        txt = txt.replace("এবং","এবং");
+        txt = txt.replace("অথবা","অথবা");
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
@@ -360,36 +364,6 @@ function buildFlow(ast) {
 }
 
 // ================== BN TEXT ==================
-/*
-function getTextBN(node){
-  if(!node) return "";
-
-  switch(node.type){
-    case "Identifier": return node.name;
-      
-  case "Literal":
-  if (typeof node.value === "string") {
-    return `"${node.value}"`;
-  }
-  if (typeof node.value === "boolean") {
-    return node.value ? "সত্য" : "মিথ্যা";
-  }
-  return enNumberToBn(node.value);
-    case "BinaryExpression": return `${getTextBN(node.left)} ${node.operator} ${getTextBN(node.right)}`;
-    case "AssignmentExpression": return `${getTextBN(node.left)} = ${getTextBN(node.right)}`;
-    case "ArrayExpression": return `[${node.elements.map(getTextBN).join(", ")}]`;
-    case "UpdateExpression":
-      return node.prefix
-        ? `${node.operator}${getTextBN(node.argument)}`
-        : `${getTextBN(node.argument)}${node.operator}`;
-    case "MemberExpression":
-      if(node.computed) return `${getTextBN(node.object)}[${getTextBN(node.property)}]`;
-      return `${getTextBN(node.object)}.${getTextBN(node.property)}`;
-    case "CallExpression": return `${getTextBN(node.callee)}(${node.arguments.map(getTextBN).join(", ")})`;
-    default: return "";
-  }
-} */
-
 
 function getTextBN(node){
   if(!node) return "";
