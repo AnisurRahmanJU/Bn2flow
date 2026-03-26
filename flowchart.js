@@ -13,7 +13,7 @@ window.onload = function () {
     lineNumbers: true,
     theme: "default",
     lineWrapping: true,
-    value: `লুপ (চলক ক = ১; ক <= ২০; ক++) {
+    value: `লুপ (ধরি ক = ১; ক <= ২০; ক++) {
   যদি (ক % ২ == ০) {
     বাদ;
   }
