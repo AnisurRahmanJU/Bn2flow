@@ -65,7 +65,12 @@ function banglaToJS(code){
     .replace(/দৈর্ঘ্য/g, "length")
     .replace(/নাল/g, "NULL")
     .replace(/প্রতিটি/g,"for_of")
-    .replace(/প্রতিটি_ইন/g,"for_in"); 
+    .replace(/প্রতিটি_ইন/g,"for_in")
+    .replace(/রাখো/g,"push")
+    .replace(/সরাও/g,"pop")
+    .replace(/আংশিক/g,"slice")
+    .replace(/বড়হাতেরঅক্ষর/g,"toUpperCase")
+    .replace(/ছোটহাতেরঅক্ষর/g,"toLowerCase"); 
 }
 
 // ================== FLOWCHART ==================
