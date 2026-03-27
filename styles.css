@@ -101,8 +101,8 @@ button:active { transform: scale(0.95); }
 
 /* ================= SYNTAX HIGHLIGHT ================= */
 .cm-variable-custom { color: gray; font-weight: 500; }
-.cm-keyword-custom { color: purple; font-weight: 600; }
+.cm-keyword-custom { color: purple; font-weight: 500; }
 .cm-func-call { color: blue; font-weight: 500; }
 .cm-object-access { color: orange; font-weight: 500; }
-.cm-bangla-number { color: limegreen; font-weight: 600; }
+.cm-bangla-number { color: limegreen; font-weight: 500; }
 
