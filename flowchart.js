@@ -334,7 +334,7 @@ function buildFlow(ast) {
         return thId;
       }
 
-     case "ExpressionStatement": {
+     /*case "ExpressionStatement": {
         const eId = newId("out");
         let txt = getTextBN(node.expression);
         txt = txt.replace("console.log","দেখাও");
@@ -342,7 +342,41 @@ function buildFlow(ast) {
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
-      }     
+      }  */
+        
+case "ExpressionStatement": {
+    // Check if it's a 'দেখাও' or 'নাও' call with another function inside
+    if(node.expression.type === "CallExpression" &&
+       (node.expression.callee.name === "console.log" || node.expression.callee.name === "prompt") &&
+       node.expression.arguments.length === 1 &&
+       node.expression.arguments[0].type === "CallExpression") {
+        
+        // First, make the inner call an operation node
+        const innerOpId = newId("op");
+        const innerText = getTextBN(node.expression.arguments[0]);
+        nodes.push(`${innerOpId}=>operation: ${innerText}`);
+        edges.push(`${prev}->${innerOpId}`);
+
+        // Then, make the 'দেখাও' / 'নাও' node a parallelogram
+        const ioId = newId("out");
+        const ioText = node.expression.callee.name === "console.log" 
+                        ? `দেখাও(${innerText})` 
+                        : `নাও(${innerText})`;
+        nodes.push(`${ioId}=>inputoutput: ${ioText}`);
+        edges.push(`${innerOpId}->${ioId}`);
+        return ioId;
+    }
+
+    // Default behavior for other expressions
+    const eId = newId("out");
+    let txt = getTextBN(node.expression);
+    txt = txt.replace("console.log","দেখাও");
+    txt = txt.replace("prompt","নাও");
+    nodes.push(`${eId}=>inputoutput: ${txt}`);
+    edges.push(`${prev}->${eId}`);
+    return eId;
+}
+        
    
       default:
         return prev;
