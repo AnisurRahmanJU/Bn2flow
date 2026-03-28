@@ -349,12 +349,12 @@ case "ExpressionStatement": {
 
     // Function to replace JS methods with Bangla
     const replaceBanglaMethods = (txt) => txt
-        .replace(".push","রাখো")
-        .replace(".pop","সরাও")
-        .replace(".slice","অংশ")
-        .replace(".toUpperCase","বড়হাতেরঅক্ষর")
-        .replace(".toLowerCase","ছোটহাতেরঅক্ষর")
-        .replace(".substr","উপস্ট্রিং")
+        .replace(".push",".রাখো")
+        .replace(".pop",".সরাও")
+        .replace(".slice",".অংশ")
+        .replace(".toUpperCase",".বড়হাতেরঅক্ষর")
+        .replace(".toLowerCase",".ছোটহাতেরঅক্ষর")
+        .replace(".substr",".উপস্ট্রিং")
         .replace("Number","নং");
 
     // If it's a console.log / prompt call
