@@ -276,15 +276,30 @@ function buildFlow(ast) {
         return afterSwitch;
       }
 
-      case "FunctionDeclaration": {
+      /*case "FunctionDeclaration": {
         const funcId = newId("func");
         const params = node.params.map(p => getTextBN(p)).join(", ");
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
         edges.push(`${prev}->${funcId}`);
         return walk(node.body, funcId);
-      }  
+      }  */
+
+    case "FunctionDeclaration": {
+    const funcId = newId("func");
+    const params = node.params.map(p => getTextBN(p)).join(", ");
+    nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
+    edges.push(`${prev}->${funcId}`);
+
+    // Walk the function body **but do not connect its last node to main flow**
+    const prevLoopUpdate = currentLoopUpdate;
+    currentLoopUpdate = null; // reset for function body
+    walk(node.body, funcId); 
+    currentLoopUpdate = prevLoopUpdate;
+
+    // Return the function node itself as the end for main flow
+    return funcId;
+}
         
-    
 
       case "ReturnStatement": {
         const rId = newId("ret");
