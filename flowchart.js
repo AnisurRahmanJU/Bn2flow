@@ -190,7 +190,7 @@ function buildFlow(ast) {
         return join;
       }
 
-       case "WhileStatement": {
+       /*case "WhileStatement": {
         const wId = newId("while");
         nodes.push(`${wId}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
         edges.push(`${prev}->${wId}`);
@@ -209,7 +209,59 @@ function buildFlow(ast) {
         edges.push(`${dEnd}->${dCond}`);
         edges.push(`${dCond}(yes)->${dStart}`);
         return dCond+"(no)";
-      }
+      }*/
+
+    case "WhileStatement": {
+    const wId = newId("while");
+    nodes.push(`${wId}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
+    edges.push(`${prev}->${wId}`);
+
+    const prevUpdate = currentLoopUpdate;
+    const loopUpdateId = node.update ? newId("upd") : null; // if you add custom updates
+    currentLoopUpdate = loopUpdateId;
+
+    const wEnd = walk(node.body, wId + "(yes)");
+
+    if(loopUpdateId){
+        const updText = getTextBN(node.update);
+        nodes.push(`${loopUpdateId}=>operation: ${updText}`);
+        edges.push(`${wEnd}->${loopUpdateId}`);
+        edges.push(`${loopUpdateId}(left)->${wId}`);
+    } else {
+        edges.push(`${wEnd}(left)->${wId}`);
+    }
+
+    currentLoopUpdate = prevUpdate;
+    return wId + "(no)";
+}
+
+    case "DoWhileStatement": {
+    const dStart = newId("do");
+    nodes.push(`${dStart}=>operation: করো`);
+    edges.push(`${prev}->${dStart}`);
+
+    const prevUpdate = currentLoopUpdate;
+    const loopUpdateId = node.update ? newId("upd") : null; // if there’s an update
+    currentLoopUpdate = loopUpdateId;
+
+    const dEnd = walk(node.body, dStart);
+
+    const dCond = newId("doCond");
+    nodes.push(`${dCond}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
+    edges.push(`${dEnd}->${dCond}`);
+
+    if(loopUpdateId){
+        const updText = getTextBN(node.update);
+        nodes.push(`${loopUpdateId}=>operation: ${updText}`);
+        edges.push(`${dCond}(yes)->${loopUpdateId}`);
+        edges.push(`${loopUpdateId}(left)->${dStart}`);
+    } else {
+        edges.push(`${dCond}(yes)->${dStart}`);
+    }
+
+    currentLoopUpdate = prevUpdate;
+    return dCond + "(no)";
+}
 
       case "ForStatement": {
         const fInit = node.init ? walk(node.init, prev) : prev;
