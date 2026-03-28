@@ -363,12 +363,12 @@ case "ExpressionStatement": {
         let txt = getTextBN(expr);
 
         // Replace common JS methods with Bangla equivalents
-        txt = txt.replace(".push","রাখো")
-                 .replace(".pop","সরাও")
-                 .replace(".slice","অংশ")
-                 .replace(".toUpperCase","বড়হাতেরঅক্ষর")
-                 .replace(".toLowerCase","ছোটহাতেরঅক্ষর")
-                 .replace(".substr","উপস্ট্রিং")
+        txt = txt.replace(".push",".রাখো")
+                 .replace(".pop",".সরাও")
+                 .replace(".slice",".অংশ")
+                 .replace(".toUpperCase",".বড়হাতেরঅক্ষর")
+                 .replace(".toLowerCase",".ছোটহাতেরঅক্ষর")
+                 .replace(".substr",".উপস্ট্রিং")
                  .replace("Number","নং");
 
         nodes.push(`${opId}=>operation: ${txt}`);
