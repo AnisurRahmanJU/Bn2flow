@@ -276,13 +276,26 @@ function buildFlow(ast) {
         return afterSwitch;
       }
 
-      case "FunctionDeclaration": {
+      /*case "FunctionDeclaration": {
         const funcId = newId("func");
         const params = node.params.map(p => getTextBN(p)).join(", ");
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
         edges.push(`${prev}->${funcId}`);
         return walk(node.body, funcId);
-      }
+      }*/   
+        
+    case "FunctionDeclaration": {
+    const funcId = newId("func");
+    const params = node.params.map(p => getTextBN(p)).join(", ");
+    
+    nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
+    edges.push(`${prev}->${funcId}`);
+
+    // ❌ function body walk করবো না (main flow clean রাখতে)
+    return funcId;
+}
+
+        
 
       case "ReturnStatement": {
         const rId = newId("ret");
