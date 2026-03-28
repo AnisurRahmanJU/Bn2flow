@@ -353,28 +353,42 @@ function buildFlow(ast) {
         return eId;
       }*/
         
-  case "ExpressionStatement": {
+ case "ExpressionStatement": {
   const eId = newId("out");
   let txt = getTextBN(node.expression);
 
-  // ✅ ALWAYS parallelogram
-  const type = "inputoutput";
+  // ✅ detect BEFORE replace
+  const isPrompt =
+    txt.includes("prompt(") ||
+    txt.includes("Number(prompt(");
 
-  // ✅ Special case FIRST (very important)
+  // 🔤 তোমার আগের replace (unchanged)
+  txt = txt.replace("console.log","দেখাও");
+  txt = txt.replace(".push",".রাখো");
+  txt = txt.replace(".pop",".সরাও");
+  txt = txt.replace(".length",".দৈর্ঘ্য");
+  txt = txt.replace(".slice",".অংশ");
+  txt = txt.replace(".toUpperCase",".বড়হাতেরঅক্ষর");
+  txt = txt.replace(".toLowerCase",".ছোটহাতেরঅক্ষর");
+  txt = txt.replace(".substr",".উপস্ট্রিং");
+  txt = txt.replace("true","সত্য");
+  txt = txt.replace("false","মিথ্যা");
+
+  // ✅ special replace (must be BEFORE prompt replace)
   txt = txt.replace(
     /Number\s*\(\s*prompt\s*\((.*?)\)\s*\)/g,
     "নং(নাও($1))"
   );
 
-  // ✅ Then normal replace
-  txt = txt.replace(/console\.log/g, "দেখাও");
-  txt = txt.replace(/prompt/g, "নাও");
+  txt = txt.replace("prompt","নাও");
+
+  // ✅ shape select
+  const type = isPrompt ? "inputoutput" : "operation";
 
   nodes.push(`${eId}=>${type}: ${txt}`);
   edges.push(`${prev}->${eId}`);
   return eId;
 }
-
       default:
         return prev;
     }
