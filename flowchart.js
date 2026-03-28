@@ -496,16 +496,16 @@ function runCode(){
   const consoleEl = document.getElementById("console");
   consoleEl.innerText = "";
 
-  // Translate Bangla → JS first
+  // Translate Bangla → JS
   const code = banglaToJS(editor.getValue());
 
   const originalLog = console.log;
-  console.log = (...args)=>consoleEl.innerText+=args.join(" ")+"\n";
+  console.log = (...args)=>consoleEl.innerText += args.join(" ") + "\n";
 
-  try { 
+  try {
     eval(code);  // Run JS, not raw Bangla
-  } catch(err){ 
-    consoleEl.innerText += "Error: " + err.message; 
+  } catch(err){
+    consoleEl.innerText += "Error: " + err.message;
   }
 
   console.log = originalLog;
