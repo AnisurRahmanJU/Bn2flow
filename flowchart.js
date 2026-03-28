@@ -468,8 +468,6 @@ function getTextBN(node){
     } else {
         let propName = node.property.name;
         if(propName === "length") propName = "দৈর্ঘ্য";
-        if(propName === "prompt") propName = "নাও";
-        if(propName === "Number") propName = "নং";
         return `${getTextBN(node.object)}.${propName}`;
     }
 
