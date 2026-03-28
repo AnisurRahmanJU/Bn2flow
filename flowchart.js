@@ -44,8 +44,8 @@ function banglaToJS(code){
     .replace(/চলক/g,"var")
     .replace(/ধ্রুবক/g,"const")
     .replace(/দেখাও/g,"console.log")
-    .replace(/\bনাও\b/g,"prompt")
-    .replace(/\bনং\b/g,"Number")
+    .replace(/নাও/g,"prompt")
+    .replace(/নং/g,"Number")
     .replace(/যদি/g,"if")
     .replace(/নাহলে/g,"else")
     .replace(/যতক্ষণ/g,"while")
@@ -481,7 +481,7 @@ function getTextBN(node){
 
 
 
-/*// ================== RUN ==================
+// ================== RUN ==================
 function runCode(){
   const consoleEl = document.getElementById("console");
   consoleEl.innerText = "";
@@ -490,26 +490,8 @@ function runCode(){
   console.log = (...args)=>consoleEl.innerText+=args.join(" ")+"\n";
   try{ eval(code); } catch(err){ consoleEl.innerText+="Error: "+err.message; }
   console.log = originalLog;
-} */
+} 
 
-function runCode(){
-  const consoleEl = document.getElementById("console");
-  consoleEl.innerText = "";
-
-  // Translate Bangla → JS
-  const code = banglaToJS(editor.getValue());
-
-  const originalLog = console.log;
-  console.log = (...args)=>consoleEl.innerText += args.join(" ") + "\n";
-
-  try {
-    eval(code);  // Run JS, not raw Bangla
-  } catch(err){
-    consoleEl.innerText += "Error: " + err.message;
-  }
-
-  console.log = originalLog;
-}
 
 // ================== DOWNLOAD BUTTON ==================
 document.getElementById("downloadBtn")?.addEventListener("click", downloadImage);
