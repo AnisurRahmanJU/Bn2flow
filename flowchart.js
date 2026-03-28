@@ -276,63 +276,15 @@ function buildFlow(ast) {
         return afterSwitch;
       }
 
-      /*case "FunctionDeclaration": {
+      case "FunctionDeclaration": {
         const funcId = newId("func");
         const params = node.params.map(p => getTextBN(p)).join(", ");
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
         edges.push(`${prev}->${funcId}`);
         return walk(node.body, funcId);
-      }*/   
+      }  
         
-    case "FunctionDeclaration": {
-    const funcId = newId("func");
-    const params = node.params.map(p => getTextBN(p)).join(", ");
-
-    // 🔍 collect all return statements
-    let returnTexts = [];
-
-    function findReturns(body){
-        if(!body) return;
-
-        if(body.type === "ReturnStatement"){
-            returnTexts.push(getTextBN(body.argument));
-        }
-
-        // traverse ভিতরের nodes
-        for(let key in body){
-            const val = body[key];
-
-            if(Array.isArray(val)){
-                val.forEach(v => {
-                    if(v && typeof v === "object"){
-                        findReturns(v);
-                    }
-                });
-            }
-            else if(val && typeof val === "object"){
-                findReturns(val);
-            }
-        }
-    }
-
-    findReturns(node.body);
-
-    // 🧠 build return text
-    let returnText = "";
-    if(returnTexts.length === 1){
-        returnText = ` → ফেরত ${returnTexts[0]}`;
-    }
-    else if(returnTexts.length > 1){
-        returnText = ` → ফেরত (${returnTexts.join(" | ")})`;
-    }
-
-    // 📦 final node
-    nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})${returnText}`);
-    edges.push(`${prev}->${funcId}`);
-
-    return funcId;
-}
-        
+    
 
       case "ReturnStatement": {
         const rId = newId("ret");
@@ -385,76 +337,6 @@ function buildFlow(ast) {
       }
 
         
-    /*case "ExpressionStatement": {
-    const expr = node.expression;
-
-    // Function to replace JS methods with Bangla
-    const replaceBanglaMethods = (txt) => txt
-        .replace(".push",".রাখো")
-        .replace(".pop",".সরাও")
-        .replace(".slice",".অংশ")
-        .replace(".toUpperCase",".বড়হাতেরঅক্ষর")
-        .replace(".toLowerCase",".ছোটহাতেরঅক্ষর")
-        .replace(".substr",".উপস্ট্রিং")
-        .replace(".length",".দৈর্ঘ্য")
-
-    // If it's a console.log / prompt call
-    if(expr.type === "CallExpression") {
-        const callee = expr.callee;
-
-        // console.log → দেখাও
-        if(callee.type === "MemberExpression" && callee.object.name === "console" && callee.property.name === "log") {
-            let arg = expr.arguments[0];
-            // If argument is a method call, show it first as rectangle
-            if(arg && (arg.type === "CallExpression" || arg.type === "MemberExpression")) {
-                const opId = newId("op");
-                let innerTxt = getTextBN(arg);
-                innerTxt = replaceBanglaMethods(innerTxt);
-                nodes.push(`${opId}=>operation: ${innerTxt}`);
-                edges.push(`${prev}->${opId}`);
-                
-                const ioId = newId("out");
-                nodes.push(`${ioId}=>inputoutput: দেখাও(${innerTxt})`);
-                edges.push(`${opId}->${ioId}`);
-                return ioId;
-            } else {
-                const ioId = newId("out");
-                let txt = getTextBN(expr).replace("console.log","দেখাও");
-                nodes.push(`${ioId}=>inputoutput: ${txt}`);
-                edges.push(`${prev}->${ioId}`);
-                return ioId;
-            }
-        }
-
-        // prompt → নাও
-        if(callee.name === "prompt") {
-            const ioId = newId("out");
-            let txt = getTextBN(expr).replace("prompt","নাও");
-            nodes.push(`${ioId}=>inputoutput: ${txt}`);
-            edges.push(`${prev}->${ioId}`);
-            return ioId;
-        }
-    }
-
-    // Other function calls / member expressions → rectangle
-    if(expr.type === "CallExpression" || expr.type === "MemberExpression" ||
-       expr.type === "AssignmentExpression" || expr.type === "UpdateExpression") {
-        const opId = newId("op");
-        let txt = getTextBN(expr);
-        txt = replaceBanglaMethods(txt);
-        nodes.push(`${opId}=>operation: ${txt}`);
-        edges.push(`${prev}->${opId}`);
-        return opId;
-    }
-
-    // Fallback → rectangle
-    const eId = newId("out");
-    let txt = getTextBN(expr);
-    txt = replaceBanglaMethods(txt);
-    nodes.push(`${eId}=>operation: ${txt}`);
-    edges.push(`${prev}->${eId}`);
-    return eId;
-}*/
    case "ExpressionStatement": {
     const expr = node.expression;
 
