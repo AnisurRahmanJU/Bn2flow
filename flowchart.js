@@ -334,15 +334,6 @@ function buildFlow(ast) {
         return thId;
       }
 
-     /*case "ExpressionStatement": {
-        const eId = newId("out");
-        let txt = getTextBN(node.expression);
-        txt = txt.replace("console.log","দেখাও");
-        txt = txt.replace("prompt","নাও");
-        nodes.push(`${eId}=>inputoutput: ${txt}`);
-        edges.push(`${prev}->${eId}`);
-        return eId;
-      }  */
         
 case "ExpressionStatement": {
     const expr = node.expression;
