@@ -286,7 +286,7 @@ function buildFlow(ast) {
 
       case "ReturnStatement": {
         const rId = newId("ret");
-        nodes.push(`${rId}=>inputoutput: ফেরত ${getTextBN(node.argument)}`);
+        nodes.push(`${rId}=>operation: ফেরত ${getTextBN(node.argument)}`);
         edges.push(`${prev}->${rId}`);
         return rId;
       }
@@ -334,7 +334,7 @@ function buildFlow(ast) {
         return thId;
       }
 
-      case "ExpressionStatement": {
+     /* case "ExpressionStatement": {
         const eId = newId("out");
         let txt = getTextBN(node.expression);
         txt = txt.replace("console.log","দেখাও");
@@ -351,7 +351,58 @@ function buildFlow(ast) {
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
-      }
+      }*/
+        
+  case "ExpressionStatement": {
+  const eId = newId("out");
+  let txt = getTextBN(node.expression);
+
+  let type = "operation"; // default rectangle
+
+  // 🔍 detect prompt (nested সহ)
+  function hasPromptCall(expr) {
+    if (!expr) return false;
+
+    if (expr.type === "CallExpression") {
+      if (expr.callee.name === "prompt") return true;
+      return expr.arguments.some(arg => hasPromptCall(arg));
+    }
+
+    return false;
+  }
+
+  // 🔍 detect console.log
+  function isConsoleLog(expr) {
+    return (
+      expr.type === "CallExpression" &&
+      expr.callee.type === "MemberExpression" &&
+      expr.callee.object.name === "console" &&
+      expr.callee.property.name === "log"
+    );
+  }
+
+  // ✅ shape decide
+  if (hasPromptCall(node.expression) || isConsoleLog(node.expression)) {
+    type = "inputoutput";
+  }
+
+  // 🔤 তোমার আগের replace গুলো 그대로 থাকবে
+  txt = txt.replace("console.log","দেখাও");
+  txt = txt.replace(".push",".রাখো");
+  txt = txt.replace(".pop",".সরাও");
+  txt = txt.replace(".length",".দৈর্ঘ্য");
+  txt = txt.replace(".slice",".অংশ");
+  txt = txt.replace(".toUpperCase",".বড়হাতেরঅক্ষর");
+  txt = txt.replace(".toLowerCase",".ছোটহাতেরঅক্ষর");
+  txt = txt.replace(".substr",".উপস্ট্রিং");
+  txt = txt.replace("true","সত্য");
+  txt = txt.replace("false","মিথ্যা");
+  txt = txt.replace("prompt","নাও");
+
+  nodes.push(`${eId}=>${type}: ${txt}`);
+  edges.push(`${prev}->${eId}`);
+  return eId;
+}
 
       default:
         return prev;
