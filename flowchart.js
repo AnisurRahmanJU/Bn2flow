@@ -353,41 +353,30 @@ function buildFlow(ast) {
         return eId;
       }*/
         
- case "ExpressionStatement": {
-  const eId = newId("out");
-  let txt = getTextBN(node.expression);
+case "ExpressionStatement": {
+  const eId = newId("proc");
+  let txt = getText(node.expression);
 
-  // ✅ detect আগে
+  // ✅ detect আগে (important)
   const isIO =
     txt.includes("console.log") ||
     txt.includes("prompt(") ||
     txt.includes("Number(prompt(");
 
-  // 🔤 তোমার original replace
-  txt = txt.replace("console.log","দেখাও");
-  txt = txt.replace(".push",".রাখো");
-  txt = txt.replace(".pop",".সরাও");
-  txt = txt.replace(".length",".দৈর্ঘ্য");
-  txt = txt.replace(".slice",".অংশ");
-  txt = txt.replace(".toUpperCase",".বড়হাতেরঅক্ষর");
-  txt = txt.replace(".toLowerCase",".ছোটহাতেরঅক্ষর");
-  txt = txt.replace(".substr",".উপস্ট্রিং");
-  txt = txt.replace("true","সত্য");
-  txt = txt.replace("false","মিথ্যা");
-
-  // ✅ special case আগে
+  // ✅ clean conversion
   txt = txt.replace(
     /Number\s*\(\s*prompt\s*\((.*?)\)\s*\)/g,
-    "নং(নাও($1))"
+    "Number(prompt($1))"
   );
 
-  // তারপর prompt
-  txt = txt.replace("prompt","নাও");
+  // (optional: তুমি চাইলে নিচে custom label দিতে পারো)
+  // txt = txt.replace("console.log", "OUTPUT");
+  // txt = txt.replace("prompt", "INPUT");
 
   // ✅ shape decide
   const type = isIO ? "inputoutput" : "operation";
 
-  nodes.push(`${eId}=>${type}: ${txt}`);
+  nodes.push(`${eId}=>${type}: ${txt}|${isIO ? "io" : "process"}`);
   edges.push(`${prev}->${eId}`);
   return eId;
 }
