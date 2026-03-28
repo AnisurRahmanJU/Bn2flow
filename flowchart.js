@@ -334,7 +334,7 @@ function buildFlow(ast) {
         return thId;
       }
 
-     case "ExpressionStatement": {
+     /*case "ExpressionStatement": {
         const eId = newId("out");
         let txt = getTextBN(node.expression);
         txt = txt.replace("console.log","দেখাও");
@@ -351,8 +351,34 @@ function buildFlow(ast) {
         nodes.push(`${eId}=>inputoutput: ${txt}`);
         edges.push(`${prev}->${eId}`);
         return eId;
-      }       
-       
+      } */      
+  case "ExpressionStatement": {
+  const eId = newId("proc");
+  let txt = getText(node.expression);
+
+  // ✅ detect ONLY real IO কাজ
+  const isIO =
+    txt.includes("console.log") ||
+    txt.includes("prompt(") ||
+    txt.includes("Number(prompt(");
+
+  // (optional UI replace চাইলে)
+  txt = txt.replace(
+    /Number\s*\(\s*prompt\s*\((.*?)\)\s*\)/g,
+    "নং(নাও($1))"
+  );
+  txt = txt.replace("console.log", "দেখাও");
+  txt = txt.replace("prompt", "নাও");
+
+  // ✅ shape
+  const type = isIO ? "inputoutput" : "operation";
+
+  nodes.push(`${eId}=>${type}: ${txt}`);
+  edges.push(`${prev}->${eId}`);
+  return eId;
+}
+
+        
       default:
         return prev;
     }
