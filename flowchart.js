@@ -346,7 +346,7 @@ case "ExpressionStatement": {
         .replace(".toUpperCase",".বড়হাতেরঅক্ষর")
         .replace(".toLowerCase",".ছোটহাতেরঅক্ষর")
         .replace(".substr",".উপস্ট্রিং")
-        replace(".length",".দৈর্ঘ্য")
+        .replace(".length",".দৈর্ঘ্য")
 
     // If it's a console.log / prompt call
     if(expr.type === "CallExpression") {
