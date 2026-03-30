@@ -146,8 +146,6 @@ function downloadImage() {
 
 // ================== AST WALK ==================
 function buildFlow(ast) {
-  let currentFunctionName = null;
-  let functionStartId = null;
   let nodes = ["st=>start: শুরু|start"];
   let edges = [];
   let count = 1;
@@ -286,15 +284,13 @@ function buildFlow(ast) {
         return walk(node.body, funcId);
       } 
 
-  
+
       case "ReturnStatement": {
         const rId = newId("ret");
         nodes.push(`${rId}=>operation: ফেরত ${getTextBN(node.argument)}`);
         edges.push(`${prev}->${rId}`);
         return rId;
       }
-  
-        
 
       case "BreakStatement": {
         const bId = newId("brk");
@@ -354,7 +350,6 @@ function buildFlow(ast) {
         .replace(".length",".দৈর্ঘ্য");
 
     // ================== CALL EXPRESSION ==================
-     
     if(expr.type === "CallExpression") {
         const callee = expr.callee;
 
@@ -391,43 +386,26 @@ function buildFlow(ast) {
             return ioId;
         }
 
-          // ===== prompt → নাও =====
-          if (callee.name === "prompt") {
+        // ===== prompt → নাও =====
+        if(callee.name === "prompt") {
             const ioId = newId("out");
             let txt = replaceBanglaMethods(
-              getTextBN(expr).replace("prompt", "নাও")
+                getTextBN(expr).replace("prompt","নাও")
             );
 
             nodes.push(`${ioId}=>inputoutput: ${txt}`);
             edges.push(`${prev}->${ioId}`);
             return ioId;
-          }
-
-          // ===== Other function calls =====
-          const opId = newId("op");
-          let txt = replaceBanglaMethods(getTextBN(expr));
-
-          nodes.push(`${opId}=>operation: ${txt}`);
-          edges.push(`${prev}->${opId}`);
-          return opId;
         }
 
-        // fallback for other expressions
+        // ===== Other function calls =====
         const opId = newId("op");
-        const txt = replaceBanglaMethods(getTextBN(expr));
+        let txt = replaceBanglaMethods(getTextBN(expr));
+
         nodes.push(`${opId}=>operation: ${txt}`);
         edges.push(`${prev}->${opId}`);
         return opId;
-      }
-
-      default:
-        return prev;
     }
-  }
-
-  const end = walk(ast, "st");
-  return { nodes, edges };
-}
 
     // ================== MEMBER EXPRESSION ==================
     // ✅ Only show when standalone
