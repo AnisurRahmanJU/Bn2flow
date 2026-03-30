@@ -146,10 +146,12 @@ function downloadImage() {
 
 // ================== AST WALK ==================
 function buildFlow(ast) {
-  let currentFunctionName = null;
+  
   let nodes = ["st=>start: শুরু|start"];
   let edges = [];
   let count = 1;
+  let currentFunctionName = null;
+  let currentFunctionId = null; // ✅ ADD THIS
   const newId = (pre) => pre + (count++);
 
   function walk(node, prev) {
@@ -289,18 +291,19 @@ function buildFlow(ast) {
   const funcId = newId("func");
   const params = node.params.map(p => getTextBN(p)).join(", ");
   
-  currentFunctionName = node.id.name; // ✅ ADD THIS
+  currentFunctionName = node.id.name;
+  currentFunctionId = funcId; // ✅ IMPORTANT
 
   nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
   edges.push(`${prev}->${funcId}`);
 
   const result = walk(node.body, funcId);
 
-  currentFunctionName = null; // ✅ RESET
+  currentFunctionName = null;
+  currentFunctionId = null;
 
   return result;
 }
-
 
       case "ReturnStatement": {
         const rId = newId("ret");
@@ -407,27 +410,27 @@ function buildFlow(ast) {
      if(expr.type === "CallExpression") {
     const calleeName = expr.callee.name;
 
-    // ✅ RECURSIVE CALL DETECT
+    // ✅ RECURSIVE CALL
     if(calleeName && calleeName === currentFunctionName) {
         const callId = newId("call");
 
-        nodes.push(`${callId}=>condition: ${calleeName}(${expr.arguments.map(getTextBN).join(", ")})`);
+        const args = expr.arguments.map(getTextBN).join(", ");
 
+        nodes.push(`${callId}=>condition: 🔁 ${calleeName}(${args})`);
         edges.push(`${prev}->${callId}`);
 
-        // YES → function re-call
-        edges.push(`${callId}(yes)->${currentFunctionName}`);
+        // ✅ FIXED (use function ID, not name)
+        edges.push(`${callId}(yes)->${currentFunctionId}`);
 
-        // NO → continue
-        const nextId = newId("afterCall");
-        nodes.push(`${nextId}=>operation: return`);
+        const nextId = newId("after");
+        nodes.push(`${nextId}=>operation: ফেরত`);
 
         edges.push(`${callId}(no)->${nextId}`);
 
         return nextId;
     }
 
-    // default
+    // default call
     const opId = newId("op");
     let txt = replaceBanglaMethods(getTextBN(expr));
 
@@ -435,7 +438,6 @@ function buildFlow(ast) {
     edges.push(`${prev}->${opId}`);
     return opId;
 }
-
         // ===== prompt → নাও =====
         if(callee.name === "prompt") {
             const ioId = newId("out");
