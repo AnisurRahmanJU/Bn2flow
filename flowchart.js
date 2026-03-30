@@ -353,7 +353,10 @@ function buildFlow(ast) {
     return rId;
 }*/
 
-    case "ReturnStatement": {
+
+
+        
+    /*case "ReturnStatement": {
     const arg = node.argument;
     const rId = newId("ret");
 
@@ -429,7 +432,56 @@ function buildFlow(ast) {
 
     edges.push(`${prev}->${rId}`);
     return rId;
+}*/
+
+
+
+
+        case "ReturnStatement": {
+    const arg = node.argument;
+    const rId = newId("ret");
+
+    // Recursive detection function (same as before)
+    function containsRecursiveCall(node, funcName) {
+        if (!node) return false;
+        if (node.type === "CallExpression" && node.callee.name === funcName) return true;
+
+        switch(node.type) {
+            case "BinaryExpression":
+            case "LogicalExpression":
+                return containsRecursiveCall(node.left, funcName) || containsRecursiveCall(node.right, funcName);
+            case "UnaryExpression":
+            case "UpdateExpression":
+                return containsRecursiveCall(node.argument, funcName);
+            case "MemberExpression":
+                return containsRecursiveCall(node.object, funcName) || containsRecursiveCall(node.property, funcName);
+            case "ConditionalExpression":
+                return containsRecursiveCall(node.test, funcName) || containsRecursiveCall(node.consequent, funcName) || containsRecursiveCall(node.alternate, funcName);
+            case "AssignmentExpression":
+                return containsRecursiveCall(node.left, funcName) || containsRecursiveCall(node.right, funcName);
+            case "ArrayExpression":
+                return node.elements.some(e => containsRecursiveCall(e, funcName));
+            case "ObjectExpression":
+                return node.properties.some(p => containsRecursiveCall(p.value, funcName));
+            default:
+                return false;
+        }
+    }
+
+    let isRecursive = currentFunctionName && containsRecursiveCall(arg, currentFunctionName);
+
+    // Create the subroutine node for the return
+    let nodeText = `ফেরত ${getTextBN(arg)}`;
+    if (isRecursive) {
+        nodeText += `\n→ রিকার্সিভ কল → ফাংশন ${currentFunctionName}(…)`; // extra label inside subroutine, multiline
+    }
+
+    nodes.push(`${rId}=>subroutine: ${nodeText}`);
+    edges.push(`${prev}->${rId}`);
+
+    return rId;
 }
+        
         
 
       case "BreakStatement": {
