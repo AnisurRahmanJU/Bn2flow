@@ -145,16 +145,18 @@ function downloadImage() {
 }
 
 //============================AST WALK=============================
+// ================== AST WALK ==================
 function buildFlow(ast) {
   let currentFunctionName = null;
   let functionStartId = null;
+  let currentLoopUpdate = null;
 
   let nodes = ["st=>start: শুরু|start"];
   let edges = [];
   let count = 1;
   const newId = (pre) => pre + (count++);
 
-  // Recursive call detection function
+  // Recursive call detection function: scans entire subtree for call to currentFunctionName
   function hasRecursiveCall(node) {
     if (!node) return false;
 
@@ -473,6 +475,44 @@ function buildFlow(ast) {
   const end = walk(ast, "st");
   return { nodes, edges };
 }
+
+          /*// ===== prompt → নাও =====
+          if (callee.name === "prompt") {
+            const ioId = newId("out");
+            let txt = replaceBanglaMethods(
+              getTextBN(expr).replace("prompt", "নাও")
+            );
+
+            nodes.push(`${ioId}=>inputoutput: ${txt}`);
+            edges.push(`${prev}->${ioId}`);
+            return ioId;
+          }
+
+          // ===== Other function calls =====
+          const opId = newId("op");
+          let txt = replaceBanglaMethods(getTextBN(expr));
+
+          nodes.push(`${opId}=>operation: ${txt}`);
+          edges.push(`${prev}->${opId}`);
+          return opId;
+        }
+
+        // fallback for other expressions
+        const opId = newId("op");
+        const txt = replaceBanglaMethods(getTextBN(expr));
+        nodes.push(`${opId}=>operation: ${txt}`);
+        edges.push(`${prev}->${opId}`);
+        return opId;
+      }
+
+      default:
+        return prev;
+    }
+  }
+
+  const end = walk(ast, "st");
+  return { nodes, edges };
+}*/
 
     // ================== MEMBER EXPRESSION ==================
     // ✅ Only show when standalone
