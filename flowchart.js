@@ -301,62 +301,8 @@ function buildFlow(ast) {
     currentFunctionName = prevFunctionName;
     return endId;
 }
-
-        
-    /*case "ReturnStatement": {
-    const arg = node.argument;
-    const rId = newId("ret");
-
-    // Recursive check if expression contains a CallExpression
-    function hasFunctionCall(node) {
-        if (!node) return false;
-        if (node.type === "CallExpression") return true;
-
-        // Check children recursively
-        switch(node.type) {
-            case "BinaryExpression":
-            case "LogicalExpression":
-                return hasFunctionCall(node.left) || hasFunctionCall(node.right);
-
-            case "UnaryExpression":
-            case "UpdateExpression":
-                return hasFunctionCall(node.argument);
-
-            case "MemberExpression":
-                return hasFunctionCall(node.object) || hasFunctionCall(node.property);
-
-            case "ConditionalExpression":
-                return hasFunctionCall(node.test) || hasFunctionCall(node.consequent) || hasFunctionCall(node.alternate);
-
-            case "AssignmentExpression":
-                return hasFunctionCall(node.left) || hasFunctionCall(node.right);
-
-            case "ArrayExpression":
-                return node.elements.some(hasFunctionCall);
-
-            case "ObjectExpression":
-                return node.properties.some(p => hasFunctionCall(p.value));
-
-            default:
-                return false;
-        }
-    }
-
-    // Use subroutine if the return contains a function call
-    if (hasFunctionCall(arg)) {
-        nodes.push(`${rId}=>subroutine: ফেরত ${getTextBN(arg)}`);
-    } else {
-        nodes.push(`${rId}=>operation: ফেরত ${getTextBN(arg)}`);
-    }
-
-    edges.push(`${prev}->${rId}`);
-    return rId;
-}*/
-
-
-
-        
-    /*case "ReturnStatement": {
+     
+    case "ReturnStatement": {
     const arg = node.argument;
     const rId = newId("ret");
 
@@ -432,56 +378,7 @@ function buildFlow(ast) {
 
     edges.push(`${prev}->${rId}`);
     return rId;
-}*/
-
-
-
-
-        case "ReturnStatement": {
-    const arg = node.argument;
-    const rId = newId("ret");
-
-    // Recursive detection function (same as before)
-    function containsRecursiveCall(node, funcName) {
-        if (!node) return false;
-        if (node.type === "CallExpression" && node.callee.name === funcName) return true;
-
-        switch(node.type) {
-            case "BinaryExpression":
-            case "LogicalExpression":
-                return containsRecursiveCall(node.left, funcName) || containsRecursiveCall(node.right, funcName);
-            case "UnaryExpression":
-            case "UpdateExpression":
-                return containsRecursiveCall(node.argument, funcName);
-            case "MemberExpression":
-                return containsRecursiveCall(node.object, funcName) || containsRecursiveCall(node.property, funcName);
-            case "ConditionalExpression":
-                return containsRecursiveCall(node.test, funcName) || containsRecursiveCall(node.consequent, funcName) || containsRecursiveCall(node.alternate, funcName);
-            case "AssignmentExpression":
-                return containsRecursiveCall(node.left, funcName) || containsRecursiveCall(node.right, funcName);
-            case "ArrayExpression":
-                return node.elements.some(e => containsRecursiveCall(e, funcName));
-            case "ObjectExpression":
-                return node.properties.some(p => containsRecursiveCall(p.value, funcName));
-            default:
-                return false;
-        }
-    }
-
-    let isRecursive = currentFunctionName && containsRecursiveCall(arg, currentFunctionName);
-
-    // Create the subroutine node for the return
-    let nodeText = `ফেরত ${getTextBN(arg)}`;
-    if (isRecursive) {
-        nodeText += `\n→ রিকার্সিভ কল → ফাংশন ${currentFunctionName}(…)`; // extra label inside subroutine, multiline
-    }
-
-    nodes.push(`${rId}=>subroutine: ${nodeText}`);
-    edges.push(`${prev}->${rId}`);
-
-    return rId;
 }
-        
         
 
       case "BreakStatement": {
