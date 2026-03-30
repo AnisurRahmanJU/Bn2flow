@@ -146,7 +146,8 @@ function downloadImage() {
 
 // ================== AST WALK ==================
 function buildFlow(ast) {
-  
+  let currentFunctionName = null;
+  let functionStartId = null;
   let nodes = ["st=>start: শুরু|start"];
   let edges = [];
   let count = 1;
@@ -277,21 +278,62 @@ function buildFlow(ast) {
         return afterSwitch;
       }
 
-      case "FunctionDeclaration": {
+      /*case "FunctionDeclaration": {
         const funcId = newId("func");
         const params = node.params.map(p => getTextBN(p)).join(", ");
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
         edges.push(`${prev}->${funcId}`);
         return walk(node.body, funcId);
-      } 
+      } */
+
+  case "FunctionDeclaration": {
+  const funcId = newId("func");
+  const params = node.params.map(p => getTextBN(p)).join(", ");
+
+  currentFunctionName = node.id.name;     //  track function name
+  functionStartId = funcId;               //  track start node
+
+  nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
+  edges.push(`${prev}->${funcId}`);
+
+  const end = walk(node.body, funcId);
+
+  currentFunctionName = null;             // reset
+  functionStartId = null;
+
+  return end;
+}
 
 
-      case "ReturnStatement": {
+      /*case "ReturnStatement": {
         const rId = newId("ret");
         nodes.push(`${rId}=>operation: ফেরত ${getTextBN(node.argument)}`);
         edges.push(`${prev}->${rId}`);
         return rId;
-      }
+      }*/
+  case "ReturnStatement": {
+  const rId = newId("ret");
+  const returnText = getTextBN(node.argument);
+
+  nodes.push(`${rId}=>operation: ফেরত ${returnText}`);
+  edges.push(`${prev}->${rId}`);
+
+  //  detect recursive call
+  if (
+    node.argument &&
+    node.argument.type === "BinaryExpression" &&
+    node.argument.right &&
+    node.argument.right.type === "CallExpression" &&
+    node.argument.right.callee.name === currentFunctionName
+  ) {
+    //  add recursive arrow
+    edges.push(`${rId}(left)->${functionStartId}`);
+  }
+
+  return rId;
+}
+
+        
 
       case "BreakStatement": {
         const bId = newId("brk");
