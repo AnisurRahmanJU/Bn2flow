@@ -286,12 +286,28 @@ function buildFlow(ast) {
       } 
 
 
-      case "ReturnStatement": {
+      /*case "ReturnStatement": {
         const rId = newId("ret");
         nodes.push(`${rId}=>subroutine: ফেরত ${getTextBN(node.argument)}`);
         edges.push(`${prev}->${rId}`);
         return rId;
-      }
+      }*/
+        
+    case "ReturnStatement": {
+    const arg = node.argument;
+    const rId = newId("ret");
+
+    // If the return is a CallExpression → subroutine
+    if(arg && arg.type === "CallExpression") {
+        nodes.push(`${rId}=>subroutine: ফেরত ${getTextBN(arg)}`);
+    } else {
+        // Everything else → operation
+        nodes.push(`${rId}=>operation: ফেরত ${getTextBN(arg)}`);
+    }
+
+    edges.push(`${prev}->${rId}`);
+    return rId;
+}
         
 
       case "BreakStatement": {
