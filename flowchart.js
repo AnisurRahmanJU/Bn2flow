@@ -4,7 +4,7 @@
 
 let editor;
 let currentLoopUpdate = null;
-
+let currentFunctionName = null;
 // ================== INIT ==================
 window.onload = function () {
   editor = CodeMirror(document.getElementById("editor"), {
