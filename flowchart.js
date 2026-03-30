@@ -276,7 +276,7 @@ function buildFlow(ast) {
         return afterSwitch;
       }
 
-      case "FunctionDeclaration": {
+      /*case "FunctionDeclaration": {
         const funcId = newId("func");
         const params = node.params.map(p => getTextBN(p)).join(", ");
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
@@ -290,7 +290,49 @@ function buildFlow(ast) {
         nodes.push(`${rId}=>operation: ফেরত ${getTextBN(node.argument)}`);
         edges.push(`${prev}->${rId}`);
         return rId;
-      }
+      }*/
+
+    case "FunctionDeclaration": {
+    const funcId = newId("func");
+    const params = node.params.map(p => getTextBN(p)).join(", ");
+    nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
+    edges.push(`${prev}->${funcId}`);
+
+    // Save current function context
+    const prevFunctionName = currentFunctionName;
+    const prevFunctionNodeId = currentFunctionNodeId;
+    currentFunctionName = node.id.name;
+    currentFunctionNodeId = funcId;
+
+    const bodyEnd = walk(node.body, funcId);
+
+    // Restore previous function context
+    currentFunctionName = prevFunctionName;
+    currentFunctionNodeId = prevFunctionNodeId;
+
+    return bodyEnd;
+}
+
+case "ReturnStatement": {
+    const rId = newId("ret");
+    const argText = getTextBN(node.argument);
+
+    // Check if return contains a recursive call
+    const isRecursive = node.argument &&
+                        node.argument.type === "CallExpression" &&
+                        node.argument.callee.type === "Identifier" &&
+                        node.argument.callee.name === currentFunctionName;
+
+    // Append "রিকার্সিভ কল" label in node text if recursive
+    const nodeLabel = isRecursive
+        ? `ফেরত ${argText} → ${currentFunctionName}(${argText.match(/\((.*)\)/)?.[1] || ""}) [রিকার্সিভ কল]`
+        : `ফেরত ${argText}`;
+
+    nodes.push(`${rId}=>operation: ${nodeLabel}`);
+    edges.push(`${prev}->${rId}`);
+
+    return rId;
+}
         
 
       case "BreakStatement": {
