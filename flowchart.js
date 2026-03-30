@@ -144,33 +144,63 @@ function downloadImage() {
   img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
 }
 
-// ================== AST WALK ==================
+//============================AST WALK=============================
 function buildFlow(ast) {
   let currentFunctionName = null;
   let functionStartId = null;
+
   let nodes = ["st=>start: শুরু|start"];
   let edges = [];
   let count = 1;
   const newId = (pre) => pre + (count++);
 
+  // Recursive call detection function
+  function hasRecursiveCall(node) {
+    if (!node) return false;
+
+    if (node.type === "CallExpression") {
+      return (
+        node.callee &&
+        node.callee.type === "Identifier" &&
+        node.callee.name === currentFunctionName
+      );
+    }
+
+    for (let key in node) {
+      const val = node[key];
+      if (val && typeof val === "object") {
+        if (Array.isArray(val)) {
+          for (let item of val) {
+            if (hasRecursiveCall(item)) return true;
+          }
+        } else {
+          if (hasRecursiveCall(val)) return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   function walk(node, prev) {
     if (!node) return prev;
 
-    switch(node.type) {
-
+    switch (node.type) {
       case "Program":
       case "BlockStatement": {
         let curr = prev;
-        node.body.forEach(n => curr = walk(n, curr));
+        node.body.forEach((n) => (curr = walk(n, curr)));
         return curr;
       }
 
       case "VariableDeclaration": {
         const vId = newId("var");
-        const vText = node.declarations.map(d => {
-          const initVal = d.init ? getTextBN(d.init) : "undefined";
-          return `${d.id.name} = ${initVal}`;
-        }).join(", ");
+        const vText = node.declarations
+          .map((d) => {
+            const initVal = d.init ? getTextBN(d.init) : "undefined";
+            return `${d.id.name} = ${initVal}`;
+          })
+          .join(", ");
         nodes.push(`${vId}=>operation: ${vText}`);
         edges.push(`${prev}->${vId}`);
         return vId;
@@ -192,7 +222,7 @@ function buildFlow(ast) {
         return join;
       }
 
-       case "WhileStatement": {
+      case "WhileStatement": {
         const wId = newId("while");
         nodes.push(`${wId}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
         edges.push(`${prev}->${wId}`);
@@ -210,7 +240,7 @@ function buildFlow(ast) {
         nodes.push(`${dCond}=>condition: যতক্ষণ (${getTextBN(node.test)})`);
         edges.push(`${dEnd}->${dCond}`);
         edges.push(`${dCond}(yes)->${dStart}`);
-        return dCond+"(no)";
+        return dCond + "(no)";
       }
 
       case "ForStatement": {
@@ -240,18 +270,18 @@ function buildFlow(ast) {
         const foId = newId("fo");
         nodes.push(`${foId}=>condition: প্রতিটি (${getTextBN(node.right)})`);
         edges.push(`${prev}->${foId}`);
-        const foEnd = walk(node.body, foId+"(yes)");
+        const foEnd = walk(node.body, foId + "(yes)");
         edges.push(`${foEnd}(left)->${foId}`);
-        return foId+"(no)";
+        return foId + "(no)";
       }
 
       case "ForInStatement": {
         const fiId = newId("fi");
         nodes.push(`${fiId}=>condition: প্রতিটি_ইন (${getTextBN(node.right)})`);
         edges.push(`${prev}->${fiId}`);
-        const fiEnd = walk(node.body, fiId+"(yes)");
+        const fiEnd = walk(node.body, fiId + "(yes)");
         edges.push(`${fiEnd}(left)->${fiId}`);
-        return fiId+"(no)";
+        return fiId + "(no)";
       }
 
       case "SwitchStatement": {
@@ -262,78 +292,54 @@ function buildFlow(ast) {
         nodes.push(`${afterSwitch}=>operation: পরবর্তী`);
         let lastCaseEnd = null;
 
-        node.cases.forEach((c,index)=>{
+        node.cases.forEach((c, index) => {
           const cLabel = c.test ? `কেস: ${getTextBN(c.test)}` : "ডিফল্ট";
           const cId = newId("case");
           nodes.push(`${cId}=>condition: ${cLabel}`);
-          if(index===0) edges.push(`${sId}(yes)->${cId}`);
+          if (index === 0) edges.push(`${sId}(yes)->${cId}`);
           else edges.push(`${lastCaseEnd}(no)->${cId}`);
-          let ce = cId+"(yes)";
-          c.consequent.forEach(stmt=>ce=walk(stmt,ce));
+          let ce = cId + "(yes)";
+          c.consequent.forEach((stmt) => (ce = walk(stmt, ce)));
           edges.push(`${ce}->${afterSwitch}`);
           lastCaseEnd = cId;
         });
 
-        if(lastCaseEnd) edges.push(`${lastCaseEnd}(no)->${afterSwitch}`);
+        if (lastCaseEnd) edges.push(`${lastCaseEnd}(no)->${afterSwitch}`);
         return afterSwitch;
       }
 
-      /*case "FunctionDeclaration": {
+      case "FunctionDeclaration": {
         const funcId = newId("func");
-        const params = node.params.map(p => getTextBN(p)).join(", ");
+        const params = node.params.map((p) => getTextBN(p)).join(", ");
+
+        currentFunctionName = node.id.name; // track function name
+        functionStartId = funcId; // track start node
+
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
         edges.push(`${prev}->${funcId}`);
-        return walk(node.body, funcId);
-      } */
 
-  case "FunctionDeclaration": {
-  const funcId = newId("func");
-  const params = node.params.map(p => getTextBN(p)).join(", ");
+        const end = walk(node.body, funcId);
 
-  currentFunctionName = node.id.name;     //  track function name
-  functionStartId = funcId;               //  track start node
+        currentFunctionName = null; // reset
+        functionStartId = null;
 
-  nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
-  edges.push(`${prev}->${funcId}`);
+        return end;
+      }
 
-  const end = walk(node.body, funcId);
-
-  currentFunctionName = null;             // reset
-  functionStartId = null;
-
-  return end;
-}
-
-
-      /*case "ReturnStatement": {
+      case "ReturnStatement": {
         const rId = newId("ret");
-        nodes.push(`${rId}=>operation: ফেরত ${getTextBN(node.argument)}`);
+        const returnText = getTextBN(node.argument);
+
+        nodes.push(`${rId}=>operation: ফেরত ${returnText}`);
         edges.push(`${prev}->${rId}`);
+
+        // Detect recursive call anywhere in return argument
+        if (hasRecursiveCall(node.argument) && functionStartId) {
+          edges.push(`${rId}(left)->${functionStartId}`);
+        }
+
         return rId;
-      }*/
-  case "ReturnStatement": {
-  const rId = newId("ret");
-  const returnText = getTextBN(node.argument);
-
-  nodes.push(`${rId}=>operation: ফেরত ${returnText}`);
-  edges.push(`${prev}->${rId}`);
-
-  //  detect recursive call
-  if (
-    node.argument &&
-    node.argument.type === "BinaryExpression" &&
-    node.argument.right &&
-    node.argument.right.type === "CallExpression" &&
-    node.argument.right.callee.name === currentFunctionName
-  ) {
-    //  add recursive arrow
-    edges.push(`${rId}(left)->${functionStartId}`);
-  }
-
-  return rId;
-}
-
-        
+      }
 
       case "BreakStatement": {
         const bId = newId("brk");
@@ -346,7 +352,7 @@ function buildFlow(ast) {
         const cId = newId("cont");
         nodes.push(`${cId}=>operation: বাদ`);
         edges.push(`${prev}->${cId}`);
-        if(currentLoopUpdate){
+        if (currentLoopUpdate) {
           edges.push(`${cId}->${currentLoopUpdate}`);
         }
         return cId;
@@ -357,16 +363,16 @@ function buildFlow(ast) {
         nodes.push(`${tStart}=>operation: চেষ্টা`);
         edges.push(`${prev}->${tStart}`);
         const tEnd = walk(node.block, tStart);
-        if(node.handler){
+        if (node.handler) {
           const cId2 = newId("catch");
           nodes.push(`${cId2}=>operation: ধরো (${node.handler.param.name})`);
           edges.push(`${tStart}(no)->${cId2}`);
           walk(node.handler.body, cId2);
         }
-        if(node.finalizer){
+        if (node.finalizer) {
           const fId = newId("finally");
           nodes.push(`${fId}=>operation: শেষ`);
-          walk(node.finalizer,fId);
+          walk(node.finalizer, fId);
         }
         return tEnd;
       }
@@ -378,79 +384,95 @@ function buildFlow(ast) {
         return thId;
       }
 
-        
-   case "ExpressionStatement": {
-    const expr = node.expression;
+      case "ExpressionStatement": {
+        const expr = node.expression;
 
-    // Function to replace JS methods with Bangla
-    const replaceBanglaMethods = (txt) => txt
-        .replace(".push",".রাখো")
-        .replace(".pop",".সরাও")
-        .replace(".slice",".অংশ")
-        .replace(".toUpperCase",".বড়হাতেরঅক্ষর")
-        .replace(".toLowerCase",".ছোটহাতেরঅক্ষর")
-        .replace(".substr",".উপস্ট্রিং")
-        .replace(".length",".দৈর্ঘ্য");
+        // Function to replace JS methods with Bangla
+        const replaceBanglaMethods = (txt) =>
+          txt
+            .replace(".push", ".রাখো")
+            .replace(".pop", ".সরাও")
+            .replace(".slice", ".অংশ")
+            .replace(".toUpperCase", ".বড়হাতেরঅক্ষর")
+            .replace(".toLowerCase", ".ছোটহাতেরঅক্ষর")
+            .replace(".substr", ".উপস্ট্রিং")
+            .replace(".length", ".দৈর্ঘ্য");
 
-    // ================== CALL EXPRESSION ==================
-     
-    if(expr.type === "CallExpression") {
-        const callee = expr.callee;
+        // ================== CALL EXPRESSION ==================
 
-        // ===== console.log → দেখাও =====
-        if(
+        if (expr.type === "CallExpression") {
+          const callee = expr.callee;
+
+          // ===== console.log → দেখাও =====
+          if (
             callee.type === "MemberExpression" &&
             callee.object.name === "console" &&
             callee.property.name === "log"
-        ) {
+          ) {
             let arg = expr.arguments[0];
 
             // ✅ Only CallExpression gets separate node
-            if(arg && arg.type === "CallExpression") {
-                const opId = newId("op");
-                let innerTxt = replaceBanglaMethods(getTextBN(arg));
+            if (arg && arg.type === "CallExpression") {
+              const opId = newId("op");
+              let innerTxt = replaceBanglaMethods(getTextBN(arg));
 
-                nodes.push(`${opId}=>operation: ${innerTxt}`);
-                edges.push(`${prev}->${opId}`);
+              nodes.push(`${opId}=>operation: ${innerTxt}`);
+              edges.push(`${prev}->${opId}`);
 
-                const ioId = newId("out");
-                nodes.push(`${ioId}=>inputoutput: দেখাও(${innerTxt})`);
-                edges.push(`${opId}->${ioId}`);
-                return ioId;
+              const ioId = newId("out");
+              nodes.push(`${ioId}=>inputoutput: দেখাও(${innerTxt})`);
+              edges.push(`${opId}->${ioId}`);
+              return ioId;
             }
 
             // ❌ MemberExpression → no extra node
             const ioId = newId("out");
             let txt = replaceBanglaMethods(
-                getTextBN(expr).replace("console.log","দেখাও")
+              getTextBN(expr).replace("console.log", "দেখাও")
             );
 
             nodes.push(`${ioId}=>inputoutput: ${txt}`);
             edges.push(`${prev}->${ioId}`);
             return ioId;
-        }
+          }
 
-     
-        // ===== prompt → নাও =====
-        if(callee.name === "prompt") {
+          // ===== prompt → নাও =====
+          if (callee.name === "prompt") {
             const ioId = newId("out");
             let txt = replaceBanglaMethods(
-                getTextBN(expr).replace("prompt","নাও")
+              getTextBN(expr).replace("prompt", "নাও")
             );
 
             nodes.push(`${ioId}=>inputoutput: ${txt}`);
             edges.push(`${prev}->${ioId}`);
             return ioId;
+          }
+
+          // ===== Other function calls =====
+          const opId = newId("op");
+          let txt = replaceBanglaMethods(getTextBN(expr));
+
+          nodes.push(`${opId}=>operation: ${txt}`);
+          edges.push(`${prev}->${opId}`);
+          return opId;
         }
 
-        // ===== Other function calls =====
+        // fallback for other expressions
         const opId = newId("op");
-        let txt = replaceBanglaMethods(getTextBN(expr));
-
+        const txt = replaceBanglaMethods(getTextBN(expr));
         nodes.push(`${opId}=>operation: ${txt}`);
         edges.push(`${prev}->${opId}`);
         return opId;
+      }
+
+      default:
+        return prev;
     }
+  }
+
+  const end = walk(ast, "st");
+  return { nodes, edges };
+}
 
     // ================== MEMBER EXPRESSION ==================
     // ✅ Only show when standalone
