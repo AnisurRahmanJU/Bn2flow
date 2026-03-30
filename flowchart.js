@@ -150,9 +150,6 @@ function buildFlow(ast) {
   let nodes = ["st=>start: শুরু|start"];
   let edges = [];
   let count = 1;
-  const callee = expr.callee;
-  let currentFunctionName = null;
-  let currentFunctionId = null; // ✅ ADD THIS
   const newId = (pre) => pre + (count++);
 
   function walk(node, prev) {
