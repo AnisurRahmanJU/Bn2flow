@@ -353,7 +353,7 @@ function buildFlow(ast) {
         .replace(".substr",".উপস্ট্রিং")
         .replace(".length",".দৈর্ঘ্য");
 
-    /*// ================== CALL EXPRESSION ==================
+    // ================== CALL EXPRESSION ==================
      
     if(expr.type === "CallExpression") {
         const callee = expr.callee;
@@ -389,39 +389,9 @@ function buildFlow(ast) {
             nodes.push(`${ioId}=>inputoutput: ${txt}`);
             edges.push(`${prev}->${ioId}`);
             return ioId;
-        }*/
+        }
 
-     if(expr.type === "CallExpression") {
-    const callee = expr.callee;   // ✅ ADD THIS
-    const calleeName = callee.name;
-
-    // ✅ RECURSIVE CALL
-    if(calleeName && calleeName === currentFunctionName) {
-        const callId = newId("call");
-
-        const args = expr.arguments.map(getTextBN).join(", ");
-
-        nodes.push(`${callId}=>condition: 🔁 ${calleeName}(${args})`);
-        edges.push(`${prev}->${callId}`);
-
-        edges.push(`${callId}(yes)->${currentFunctionId}`);
-
-        const nextId = newId("after");
-        nodes.push(`${nextId}=>operation: ফেরত`);
-
-        edges.push(`${callId}(no)->${nextId}`);
-
-        return nextId;
-    }
-
-    // default call
-    const opId = newId("op");
-    let txt = replaceBanglaMethods(getTextBN(expr));
-
-    nodes.push(`${opId}=>operation: ${txt}`);
-    edges.push(`${prev}->${opId}`);
-    return opId;
-}
+     
         // ===== prompt → নাও =====
         if(callee.name === "prompt") {
             const ioId = newId("out");
