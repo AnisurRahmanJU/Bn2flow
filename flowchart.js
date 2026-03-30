@@ -280,31 +280,14 @@ function buildFlow(ast) {
         return afterSwitch;
       }
 
-      /*case "FunctionDeclaration": {
+      case "FunctionDeclaration": {
         const funcId = newId("func");
         const params = node.params.map(p => getTextBN(p)).join(", ");
         nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
         edges.push(`${prev}->${funcId}`);
         return walk(node.body, funcId);
-      } */
+      } 
 
-  case "FunctionDeclaration": {
-  const funcId = newId("func");
-  const params = node.params.map(p => getTextBN(p)).join(", ");
-  
-  currentFunctionName = node.id.name;
-  currentFunctionId = funcId; // ✅ IMPORTANT
-
-  nodes.push(`${funcId}=>subroutine: ফাংশন: ${node.id.name}(${params})`);
-  edges.push(`${prev}->${funcId}`);
-
-  const result = walk(node.body, funcId);
-
-  currentFunctionName = null;
-  currentFunctionId = null;
-
-  return result;
-}
 
       case "ReturnStatement": {
         const rId = newId("ret");
