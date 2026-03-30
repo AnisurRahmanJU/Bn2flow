@@ -323,23 +323,18 @@ function buildFlow(ast) {
                       node.argument.callee.name === currentFunctionName;
 
     if (isRecursive) {
-        // Create only one node for recursive return (no extra merge nodes)
         nodes.push(`${rId}=>operation: ফেরত ${retText} (recursive)`);
-
-        // Connect previous node to this return node
         edges.push(`${prev}->${rId}`);
 
-        // Connect return node directly back to function start node
+        // Normal solid arrow back to function start node
         edges.push(`${rId}->${currentFunctionNodeId}`);
-
-        // **Return the recursive return node ID to continue flow**
-        return rId;
     } else {
         nodes.push(`${rId}=>operation: ফেরত ${retText}`);
         edges.push(`${prev}->${rId}`);
-        return rId;
     }
+    return rId;
 }
+        
 
       case "BreakStatement": {
         const bId = newId("brk");
