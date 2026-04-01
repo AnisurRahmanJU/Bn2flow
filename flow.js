@@ -5,7 +5,6 @@
 let editor;
 let currentLoopUpdate = null;
 let currentFunctionName = null;
-let isFlowchartGenerated = false;
 // ================== INIT ==================
 window.onload = function () {
   editor = CodeMirror(document.getElementById("editor"), {
@@ -80,21 +79,19 @@ function banglaToJS(code){
 }
 
 // ================== FLOWCHART ==================
-
 function generateFlowchart() {
   const bnCode = editor.getValue();
   const code = banglaToJS(bnCode);
+  let isFlowchartGenerated = false;
 
   const output = document.getElementById("output");
-  const runBtn = document.getElementById("runBtn");
-
-  output.innerHTML = "";
+  output.innerHTML = ""; 
 
   try {
     const ast = esprima.parseScript(code, { range: true });
     const flowCode = buildFlow(ast);
     const diagram = flowchart.parse(flowCode);
-
+    
     const isMobile = window.innerWidth <= 600;
 
     diagram.drawSVG(output, {
@@ -116,16 +113,12 @@ function generateFlowchart() {
       }
     });
 
-    // ✅ Enable Run button
-    runBtn.disabled = false;
-
   } catch (err) {
-    // ❌ Error হলে আবার disable
-    runBtn.disabled = true;
-
     output.innerHTML = `<p style="color:red">${err.message}</p>`;
   }
 }
+
+
 // ================== DOWNLOAD FLOWCHART ==================
 function downloadImage() {
   const svg = document.querySelector("#output svg");
@@ -628,6 +621,7 @@ function runCode(){
   try{ eval(code); } catch(err){ consoleEl.innerText+="Error: "+err.message; }
   console.log = originalLog;
 } 
+
 
 
 // ================== DOWNLOAD BUTTON ==================
