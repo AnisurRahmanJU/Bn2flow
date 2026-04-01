@@ -16,35 +16,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.15.0/flowchart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/esprima/dist/esprima.min.js"></script>
-  <style>
-  #runBtn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  /*  Disabled অবস্থায় */
-  #runBtn:disabled {
-    background-color: #ccc;
-    color: #666;
-    cursor: not-allowed;
-    font-size: 14.5px;
-  }
-
-  /*  Enabled অবস্থায় */
-  #runBtn:not(:disabled) {
-    background-color: #28a745;
-    color: white;
-    font-size: 14.5px;
-  }
-
-  #runBtn:not(:disabled):hover {
-    background-color: #218838;
-  }
-</style>
 </head>
 <body>
 
@@ -68,7 +39,7 @@
   </div><br>
 
   <!-- ✅ SAME LINE BUTTON -->
-  <button id="runBtn" onclick="runCode()" disabled title="আগে ফ্লোচার্ট তৈরি করুন"> ফ্লোচার্ট রান করুন </button>
+  <button onclick="runCode()">কোড রান করুন</button>
   <button onclick="downloadImage()">ডাউনলোড ফ্লোচার্ট</button>
 
   <br><br>
